@@ -1,0 +1,117 @@
+.content-archive-page {
+  padding-top: calc(var(--header-height) + 2rem);
+  padding-bottom: 2rem;
+  min-height: 80vh;
+  direction: rtl;
+}
+
+.archive-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.archive-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.archive-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.archive-subtitle {
+  color: #666;
+  font-size: 1rem;
+}
+
+
+
+
+
+
+/* Filters */
+.filter-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.filter-list::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-item {
+  padding: 0.6rem 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  text-decoration: none; /* Ensure no underline */
+}
+
+.filter-item:hover {
+  background-color: rgba(134, 163, 176, 0.1); /* Subtle hover effect based on accent */
+  border-color: var(--accent-color);
+}
+
+.filter-item.active {
+  background-color: var(--accent-color); /* Use the accent color as requested */
+  color: var(--bg-color); /* Contrast text */
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.page-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #eee;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+  font-weight: 600;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.page-btn.active {
+  background: #2C3E50;
+  color: white;
+  border-color: #2C3E50;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

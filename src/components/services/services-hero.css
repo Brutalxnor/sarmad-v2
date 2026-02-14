@@ -1,0 +1,286 @@
+/* Service Tabs - All three tabs always visible */
+.service-tabs {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 3rem auto 2rem;
+    max-width: 1000px;
+    flex-wrap: wrap;
+}
+
+.service-tab {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 16px 16px 0 0;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    min-width: 200px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    flex: 1;
+}
+
+.service-tab:hover:not(.active):not(.coming-soon) {
+    background: var(--hover-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Active tab - greyed out appearance */
+.service-tab.active {
+    background: #e0e0e0;
+    color: #888;
+    cursor: default;
+    border-bottom: none;
+    box-shadow: none;
+}
+
+[data-theme='dark'] .service-tab.active {
+    background: #2a2a2a;
+    color: #666;
+}
+
+.service-tab.active .tab-title {
+    color: #888;
+}
+
+[data-theme='dark'] .service-tab.active .tab-title {
+    color: #666;
+}
+
+.service-tab.active .tab-icon {
+    opacity: 0.5;
+}
+
+.service-tab.coming-soon {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.service-tab.coming-soon:hover {
+    transform: none;
+}
+
+.tab-icon {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: opacity 0.3s ease;
+}
+
+.tab-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-align: right;
+    flex: 1;
+    transition: color 0.3s ease;
+}
+
+[data-theme='dark'] .tab-title {
+    color: #ffffff
+}
+
+.tab-coming-soon-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: #FFB800;
+    color: #000;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 184, 0, 0.3);
+}
+
+/* Active Service Card - Large card below tabs with full-width image */
+.service-active-card {
+    background: var(--card-bg);
+    border: 3px solid var(--border-color);
+    border-radius: 0 0 24px 24px;
+    padding: 0;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.active-card-content {
+    text-align: center;
+    width: 100%;
+}
+
+.active-service-icon {
+    width: 100%;
+    height: 500px;
+    margin: 0;
+    overflow: hidden;
+}
+
+.active-service-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.active-service-title {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    color: var(--text-color);
+    margin: 2rem 0;
+    padding: 0 2rem;
+    line-height: 1.4;
+}
+
+/* Active state colors for different services */
+.service-active-card.active-hometest {
+    border-color: var(--primary-color);
+}
+
+.service-active-card.active-expert {
+    border-color: var(--secondary-color);
+}
+
+.service-active-card.active-program {
+    border-color: var(--tertiary-color);
+}
+
+/* Dark theme adjustments */
+[data-theme='dark'] .service-tab {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .service-tab:hover:not(.active):not(.coming-soon) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .service-active-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .service-tabs {
+        gap: 0.75rem;
+        margin: 2rem auto 1.5rem;
+    }
+
+    .service-tab {
+        min-width: 160px;
+        padding: 0.75rem 1rem;
+        flex: 1 1 calc(50% - 0.375rem);
+    }
+
+    .tab-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .tab-title {
+        font-size: 0.85rem;
+    }
+
+    .active-service-icon {
+        height: 350px;
+    }
+
+    .active-service-title {
+        font-size: 1.5rem !important;
+        margin: 1.5rem 0;
+        padding: 0 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .service-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .service-tab {
+        min-width: 100%;
+        border-radius: 12px;
+        flex: 1 1 100%;
+    }
+
+    .service-tab.active {
+        border-radius: 12px 12px 0 0;
+    }
+
+    .service-active-card {
+        border-radius: 0 0 16px 16px;
+    }
+
+    .active-service-icon {
+        height: 250px;
+    }
+
+    .active-service-title {
+        font-size: 1.25rem !important;
+        margin: 1rem 0;
+        padding: 0 1rem;
+    }
+
+    .tab-coming-soon-badge {
+        top: -6px;
+        left: -6px;
+        padding: 3px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .active-service-icon {
+        height: 200px;
+    }
+
+    .active-service-title {
+        font-size: 1.1rem !important;
+        margin: 0.75rem 0;
+    }
+}
+
+/* Active Service Card Styles */
+.service-card.active-hometest,
+.service-card.active-expert,
+.service-card.active-program {
+    background: #3a7d8e;
+    /* Teal-ish color from the image */
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(58, 125, 142, 0.3);
+}
+
+.service-card.active-hometest h3,
+.service-card.active-expert h3,
+.service-card.active-program h3 {
+    color: #ffffff !important;
+}
+
+.service-card.active-hometest .service-icon,
+.service-card.active-expert .service-icon,
+.service-card.active-program .service-icon {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .service-card.active-hometest,
+[data-theme='light'] .service-card.active-expert,
+[data-theme='light'] .service-card.active-program {
+    background: #00161e;
+    color: #ffffff;
+}
+
+[data-theme='light'] .service-card.active-hometest h3,
+[data-theme='light'] .service-card.active-expert h3,
+[data-theme='light'] .service-card.active-program h3 {
+    color: #ffffff !important;
+}

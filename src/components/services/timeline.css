@@ -1,0 +1,268 @@
+/* Shared Timeline Card Styles */
+.timeline-card {
+    background: rgba(17, 34, 51, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: right;
+}
+
+[data-theme="light"] .timeline-card {
+    background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
+        linear-gradient(135deg, rgba(255, 255, 255, 0), var(--accent-color)) border-box;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-card h3 {
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+[data-theme="light"] .timeline-card h3 {
+    color: var(--text-primary);
+}
+
+.timeline-card p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="light"] .timeline-card p {
+    color: var(--text-secondary);
+}
+
+/* Base Mobile/Tablet Styles */
+@media (max-width: 768px) {
+    .hometest-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        position: relative;
+        padding-right: 20px;
+        /* Space for axis on the RIGHT since RTL */
+        margin-top: 2rem;
+        min-height: auto;
+    }
+
+    /* Vertical Axis on the Right (RTL) */
+    .timeline-axis {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 1px;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    [data-theme="light"] .timeline-axis {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Axis Ticks */
+    .timeline-axis::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 10px;
+        background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+        background-size: 100% 20px;
+        transform: translateX(50%);
+        /* Center on line */
+    }
+
+    [data-theme="light"] .timeline-axis::after {
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    }
+
+    /* Item Layout: Row (Horizontal Stalk + Card) */
+    .timeline-item {
+        display: flex;
+        flex-direction: row;
+        /* Horizontal alignment */
+        align-items: center;
+        width: 100%;
+        justify-content: flex-start;
+        position: relative;
+        padding-bottom: 0;
+        height: auto;
+        margin-bottom: 1rem;
+    }
+
+    /* Reorder for RTL: Card <-- Stalk <-- Axis */
+
+    /* The Marker (Horizontal Stalk) */
+    .timeline-marker {
+        display: flex !important;
+        flex-direction: row-reverse;
+        /* Line then dot */
+        align-items: center;
+        height: 20px !important;
+        /* Fixed height for horizontal line */
+        width: min(var(--line-height), 60px);
+        /* Repurpose height var for width in mobile */
+        /* Note: In JS we might need to adjust the variable usage or we just treat 'height' as length */
+        position: relative;
+        margin-left: 10px;
+        order: 1;
+        /* Stalk comes first (right side) */
+        flex-shrink: 0;
+    }
+
+    .marker-line {
+        height: 1px !important;
+        width: 100% !important;
+        flex-grow: 1;
+        background: linear-gradient(to left, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5));
+    }
+
+    [data-theme="light"] .marker-line {
+        background: linear-gradient(to left, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.3));
+    }
+
+    .marker-dot {
+        position: static;
+        /* Flow naturally */
+        transform: none;
+        flex-shrink: 0;
+        /* Dot is at the start of the line (near axis) */
+    }
+
+    /* The Card */
+    .timeline-card {
+        width: auto;
+        flex-grow: 1;
+        order: 2;
+        /* Card comes second (left side) */
+        margin: 0;
+    }
+
+    /* Hide step numbers on mobile too for this clean look */
+    .step-number {
+        display: none;
+    }
+}
+
+/* DESKTOP STYLES (Min-width 769px) */
+@media (min-width: 769px) {
+    .hometest-timeline {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        /* Align bottom to header axis */
+        position: relative;
+        padding-bottom: 0;
+        min-height: 400px;
+        /* Give enough height for stalks */
+        margin-top: 4rem;
+    }
+
+    .timeline-axis {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Optional Ticks */
+    .timeline-axis::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 10px;
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+        background-size: 20px 100%;
+        transform: translateY(-50%);
+    }
+
+    .timeline-item {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        height: 100%;
+    }
+
+    .timeline-card {
+        width: 90%;
+        margin-bottom: 1rem;
+    }
+
+    .timeline-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 20px;
+        height: var(--line-height);
+        /* Controlled by inline style & animation */
+        position: relative;
+    }
+
+    .marker-line {
+        width: 2px;
+        flex-grow: 1;
+        width: 2px;
+        /* Default (Dark Mode) */
+        background: linear-gradient(to top, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.6));
+    }
+
+    [data-theme="light"] .marker-line {
+        /* Light Mode */
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4));
+    }
+
+    .marker-dot {
+        width: 10px;
+        height: 10px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+    }
+
+    [data-theme="light"] .marker-dot {
+        background: var(--accent-color);
+        box-shadow: 0 0 10px rgba(0, 150, 204, 0.3);
+    }
+
+    /* Axis Line Adjustment */
+    .timeline-axis {
+        background: rgba(255, 255, 255, 0.3);
+        height: 2px;
+    }
+
+    [data-theme="light"] .timeline-axis {
+        background: rgba(0, 0, 0, 0.15);
+    }
+
+    .timeline-axis::after {
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+    }
+
+    [data-theme="light"] .timeline-axis::after {
+        background-image: linear-gradient(to right, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    }
+}
+
+/* On desktop, hide step-number or style it differently inside the card */
+.step-number {
+    display: none;
+}
