@@ -66,6 +66,13 @@ const Header = ({ theme, toggleTheme }) => {
     navigate('/education');
   };
 
+  const handleAboutEducationClick = (e) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    setDesktopMenuOpen(false);
+    navigate('/about-education');
+  };
+
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container header-content">
@@ -81,7 +88,23 @@ const Header = ({ theme, toggleTheme }) => {
         <nav className="nav">
           <ul className="nav-links">
             <li><NavLink to="/" end>الرئيسية</NavLink></li>
-            <li><NavLink to="/education">مركز التثقيف</NavLink></li>
+            <li className="nav-item-dropdown has-dropdown">
+              <NavLink to="/education">مرصد سرمد للنوم</NavLink>
+              <ul className="services-dropdown">
+                <li>
+                  <button className="dropdown-link" onClick={() => navigate('/education')}>
+                    <span className="service-name">المحتوى التعليمي</span>
+                    <span className="service-desc">مقالات، فيديوهات، ودورات تدريبية</span>
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-link" onClick={() => navigate('/about-education')}>
+                    <span className="service-name">عن مرصد سرمد للنوم</span>
+                    <span className="service-desc">تعرف على رؤيتنا وأهدافنا التعليمية</span>
+                  </button>
+                </li>
+              </ul>
+            </li>
             <li className="nav-item-dropdown has-dropdown">
               <NavLink to="/services">الخدمات</NavLink>
               <ul className="services-dropdown">
@@ -217,7 +240,13 @@ const Header = ({ theme, toggleTheme }) => {
         <nav className="mobile-nav">
           <ul className="mobile-nav-links">
             <li><a href="/" onClick={(e) => { e.preventDefault(); handleNavClick('/'); }}>الرئيسية</a></li>
-            <li><a href="/education" onClick={handleEducationClick}>مركز التثقيف</a></li>
+            <li>
+              <a href="/education" onClick={handleEducationClick}>مرصد سرمد للنوم</a>
+              <ul className="mobile-services-sub">
+                <li><a href="/education" className="mobile-service-item" onClick={handleEducationClick}>المحتوى التعليمي</a></li>
+                <li><a href="/about-education" className="mobile-service-item" onClick={handleAboutEducationClick}>عن مرصد سرمد للنوم</a></li>
+              </ul>
+            </li>
             <li>
               <a href="/services" onClick={handleServicesClick}>الخدمات</a>
               <ul className="mobile-services-sub">

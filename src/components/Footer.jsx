@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Footer = () => {
   const navigate = useNavigate();
+
   return (
     <footer className="footer">
       <div className="container footer-content">
@@ -29,7 +30,12 @@ const Footer = () => {
         <div className="footer-col">
           <h4>روابط سريعة</h4>
           <ul className="footer-links">
-            <li><span className="footer-link" onClick={() => navigate("/education")}>مركز التثقيف</span></li>
+            <li>
+              <span className="footer-link" onClick={() => navigate("/education")}>مرصد سرمد للنوم</span>
+              <ul className="footer-sub-links" style={{ listStyle: 'none', paddingRight: '1rem', marginTop: '0.5rem' }}>
+                <li><span className="footer-link sub-link" style={{ fontSize: '0.85rem', opacity: 0.8 }} onClick={() => navigate("/about-education")}>عن مرصد سرمد للنوم</span></li>
+              </ul>
+            </li>
             <li><span className="footer-link" onClick={() => navigate("/assessment")}>التقييم المجاني</span></li>
             <li><span className="footer-link" onClick={() => navigate("/services")}>الخدمات</span></li>
             <li><span className="footer-link" onClick={() => navigate("/webinars")}>الندوات</span></li>
@@ -57,11 +63,9 @@ const Footer = () => {
           </div>
           <div className="contact-item">
             <span className="contact-info" dir="ltr">+966 50 000 0000</span>
-            {/* <span className="contact-icon">📞</span> */}
           </div>
           <div className="contact-item">
             <span className="contact-info">الرياض، المملكة العربية السعودية</span>
-            {/* <span className="contact-icon">📍</span> */}
           </div>
         </div>
       </div>
@@ -69,16 +73,16 @@ const Footer = () => {
       <div className="footer-bottom">
         <div className="container bottom-inner">
           <div className="legal-links">
-            <a href="#">إخلاء المسؤولية الطبية</a>
-            <a href="#">الشروط والأحكام</a>
-            <a href="#">سياسة الخصوصية</a>
+            <button className="legal-link-btn" onClick={() => navigate('/legal/disclaimer')}>إخلاء المسؤولية الطبية</button>
+            <button className="legal-link-btn" onClick={() => navigate('/legal/terms')}>الشروط والأحكام</button>
+            <button className="legal-link-btn" onClick={() => navigate('/legal/privacy')}>سياسة الخصوصية</button>
+            <button className="legal-link-btn" onClick={() => navigate('/legal/usage')}>سياسة الاستخدام المقبول</button>
           </div>
           <div className="copyright">
             © 2026 سرمد. جميع الحقوق محفوظة.
           </div>
         </div>
       </div>
-
     </footer>
   );
 };

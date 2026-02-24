@@ -39,6 +39,32 @@ const Assessment = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep]);
 
+  // Load progress from localStorage
+  useEffect(() => {
+    const savedProgress = localStorage.getItem('assessment_progress');
+    if (savedProgress) {
+      try {
+        const { step, savedAnswers } = JSON.parse(savedProgress);
+        if (typeof step === 'number' && savedAnswers) {
+          setCurrentStep(step);
+          setAnswers(savedAnswers);
+        }
+      } catch (e) {
+        console.error("Failed to parse saved progress", e);
+      }
+    }
+  }, []);
+
+  // Save progress to localStorage
+  useEffect(() => {
+    if (Object.keys(answers).length > 0 || currentStep > 0) {
+      localStorage.setItem('assessment_progress', JSON.stringify({
+        step: currentStep,
+        savedAnswers: answers
+      }));
+    }
+  }, [currentStep, answers]);
+
   const answeredCount = Object.keys(answers).length;
   // Progress is based on questions answered. 
   // If we want it to be "Step X of Y", we show progress as (currentStep / totalSteps) * 100 
@@ -99,6 +125,7 @@ const Assessment = () => {
 
       setIsSubmitting(false);
       setShowConfetti(true);
+      localStorage.removeItem('assessment_progress'); // Clear progress on success
 
       setTimeout(() => {
         navigate(`/results?id=${assessmentId}`, {

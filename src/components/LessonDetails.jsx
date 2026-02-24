@@ -40,7 +40,7 @@ const LessonDetails = () => {
                 <aside className="article-sidebar">
                     <div className="sidebar-card cta-card">
                         <h3>هل أنت مستعد لتعلّم المزيد؟</h3>
-                        <p>تصفح المزيد من الدورات والدروس في مركز التثقيف.</p>
+                        <p>تصفح المزيد من الدورات والدروس في مرصد سرمد للنوم.</p>
                         <button className="sidebar-btn primary" onClick={() => navigate('/education')}>
                             تصفح الدورات
                         </button>

@@ -8,6 +8,8 @@ import LoadingModal from './shared/LoadingModal';
 
 import './EducationGrid.css';
 
+import newsData from '../data/news.json';
+
 const EducationGrid = ({ activeCategory, activeSegment }) => {
     const [articles, setArticles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +34,8 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
                         thumbnail_image: course.thumbnail_url,
                         type: 'course'
                     }));
+                } else if (activeCategory === 'news') {
+                    data = newsData.map(item => ({ ...item, type: 'article' })); // Map as article for rendering
                 } else if (activeCategory === 'all') {
                     const [articlesRes, videosRes, coursesRes] = await Promise.all([
                         ContentAPI.getArticles(),
@@ -46,8 +50,9 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
                         thumbnail_image: item.thumbnail_url,
                         type: 'course'
                     }));
+                    const news = newsData.map(item => ({ ...item, type: 'article' }));
 
-                    data = [...articles, ...videos, ...courses].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    data = [...articles, ...videos, ...courses, ...news].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 } else {
                     const response = await ArticleAPI.GetAllArticles();
                     const allData = response.data || [];

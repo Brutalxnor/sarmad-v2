@@ -478,12 +478,12 @@ section {
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: var(--tertiary-orange);
+  color: var(--accent-color);
 }
 
 [data-theme='light'] .nav-links a:hover,
 [data-theme='light'] .nav-links a.active {
-  color: var(--tertiary-magenta);
+  color: var(--accent-color);
 }
 
 /* Services Dropdown */
@@ -3551,6 +3551,7 @@ section {
   align-items: center;
 }
 
+
 .legal-links {
   display: flex;
   gap: 2rem;
@@ -3563,8 +3564,27 @@ section {
   transition: color 0.3s ease;
 }
 
-.legal-links a:hover {
+.legal-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: color 0.3s ease;
+}
+
+.legal-link-btn:hover {
   color: #81d4fa;
+}
+
+[data-theme='dark'] .legal-link-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme='dark'] .legal-link-btn:hover {
+  color: #ffffff;
 }
 
 .copyright {
@@ -7472,6 +7492,7 @@ section {
 }
 
 .footer-link {
+  color: var(--text-secondary);
   cursor: pointer;
   transition: color 0.3s ease;
 }

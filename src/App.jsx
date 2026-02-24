@@ -20,6 +20,8 @@ import WebinarsPage from './components/Webinars/WebinarsPage';
 import WebinarDetails from './components/Webinars/WebinarDetails';
 import FAQPage from './components/FAQPage';
 import WhatsAppButton from './components/shared/WhatsAppButton';
+import LegalPage from './components/LegalPage';
+import AboutEducation from './components/AboutEducation';
 
 function App() {
   // Function to detect theme based on time of day
@@ -58,6 +60,7 @@ function App() {
 
 
             <Route path="/education" element={<EducationCenter />} />
+            <Route path="/about-education" element={<AboutEducation />} />
             <Route path="/education/article/:id" element={<ArticleDetails />} />
             <Route path="/education/video/:id" element={<VideoDetails />} />
             <Route path="/education/course/:id" element={<CourseDetails />} />
@@ -69,6 +72,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/complete-profile" element={<ProfileCompletion />} />
+            <Route path="/legal/:policyId" element={<LegalPage />} />
           </Routes>
         </main>
         <Footer />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ProfilesAPI from '../Api/Profiles/profiles.api';
@@ -16,26 +16,19 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [isSupportOpen, setIsSupportOpen] = useState(false);
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState('saved'); // 'saved', 'assessments', or 'orders'
-    const [message, setMessage] = useState({ type: '', text: '' });
+    const [activeTab, setActiveTab] = useState('saved');
     const [supportMessage, setSupportMessage] = useState('');
     const [sendingMessage, setSendingMessage] = useState(false);
-
-    // Data states
-    const [savedContent, setSavedContent] = useState([]);
-    const [assessments, setAssessments] = useState([]);
-    const [orders, setOrders] = useState([]);
-    const [contentLoading, setContentLoading] = useState(true);
-
+    const [message, setMessage] = useState({ text: '', type: '' });
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        name: '',
-        age_range: '',
-        gender: '',
-        city: '',
-        mobile: '',
-        email: '',
-        language: 'ar'
+        name: profile?.name || '',
+        age_range: profile?.age_range || '',
+        gender: profile?.gender || '',
+        city: profile?.city || '',
+        mobile: profile?.mobile || '',
+        email: profile?.email || '',
+        language: profile?.language || 'ar'
     });
 
     useEffect(() => {
@@ -52,7 +45,11 @@ const Profile = () => {
         }
     }, [profile]);
 
-    // Fetch user data when session or profile is available
+    const [savedContent, setSavedContent] = useState([]);
+    const [assessments, setAssessments] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [contentLoading, setContentLoading] = useState(true);
+
     useEffect(() => {
         if (profile?.id && session?.access_token) {
             fetchUserData();
@@ -62,14 +59,13 @@ const Profile = () => {
     const fetchUserData = async () => {
         setContentLoading(true);
         try {
-            // Fetch saved content (articles/videos) and saved courses in parallel
-            const [savedRes, savedCoursesRes, assessmentRes] = await Promise.all([
+            const [savedRes, savedCoursesRes, assessmentRes, ordersRes] = await Promise.all([
                 ArticleAPI.GetSavedContent(session.access_token),
                 SavedCoursesAPI.getUserSavedCourses(session.access_token),
-                AssessmentAPI.GetUserAssessments(profile.id)
+                AssessmentAPI.GetUserAssessments(profile.id),
+                OrdersAPI.getUserOrders(session.access_token)
             ]);
 
-            // Transform courses to match the visual structure of saved content if needed
             const normalizedCourses = (savedCoursesRes.data || []).map(item => ({
                 ...item,
                 content: {
@@ -87,6 +83,7 @@ const Profile = () => {
 
             setSavedContent(combinedContent);
             setAssessments(assessmentRes.data || []);
+            setOrders(ordersRes.data || []);
         } catch (err) {
             console.error("Failed to fetch user data:", err);
         } finally {
@@ -94,611 +91,395 @@ const Profile = () => {
         }
     };
 
-    const fetchOrders = async () => {
-        try {
-            const ordersRes = await OrdersAPI.getUserOrders(session.access_token);
-            setOrders(ordersRes.data || []);
-        } catch (err) {
-            console.error("Failed to fetch orders:", err);
-        }
-    };
-
     const getRiskData = (score, symptoms) => {
         const s = symptoms?.toLowerCase() || "";
         if (s === "insomnia" || score >= 90) {
-            return {
-                label: "أنماط الأرق (Insomnia)",
-                color: "#EF4444",
-                background: "rgba(239, 68, 68, 0.1)",
-                status: "يتطلب تدخل متخصص"
-            };
+            return { label: "أنماط الأرق (Insomnia)", color: "#fe676e", status: "يتطلب تدخل متخصص" };
         } else if (s === "apnea" || score >= 40) {
-            return {
-                label: "انقطاع النفس (Apnea)",
-                color: "#F59E0B",
-                background: "rgba(245, 158, 11, 0.1)",
-                status: "توصية عاجلة"
-            };
+            return { label: "انقطاع النفس (Apnea)", color: "#fd8f52", status: "توصية عاجلة" };
         } else {
-            return {
-                label: "مخاطر منخفضة (Low Risk)",
-                color: "#22C55E",
-                background: "rgba(34, 197, 94, 0.1)",
-                status: "مخاطر منخفضة"
-            };
+            return { label: "مخاطر منخفضة (Low Risk)", color: "#86a3b0", status: "حالة جيدة" };
         }
     };
 
-    // Get the latest assessment for status display
-    const latestAssessment = assessments.length > 0
-        ? assessments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-        : null;
+    const latestAssessment = useMemo(() =>
+        assessments.length > 0 ? [...assessments].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] : null
+        , [assessments]);
+
+    const latestOrder = useMemo(() =>
+        orders.length > 0 ? [...orders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] : null
+        , [orders]);
 
     const riskData = latestAssessment ? getRiskData(latestAssessment.score || 0, latestAssessment.symptoms) : null;
 
+    const journeySteps = useMemo(() => [
+        {
+            id: 'assessment',
+            title: 'تقييم النوم المستند للعلم',
+            status: assessments.length > 0 ? 'completed' : 'pending',
+            action: () => navigate('/assessment'),
+            buttonText: assessments.length > 0 ? 'عرض النتائج' : 'بدأ التقييم',
+            icon: '📋'
+        },
+        {
+            id: 'study',
+            title: 'دراسة النوم المنزلية (HST)',
+            status: latestOrder ? (latestOrder.operational_status === 'Report Ready' ? 'completed' : 'processing') : 'pending',
+            action: () => navigate('/services'),
+            buttonText: latestOrder ? 'تتبع الطلب' : 'طلب الدراسة',
+            icon: '🏠'
+        },
+        {
+            id: 'consultation',
+            title: 'استشارة طبية متخصصة',
+            status: 'pending', // Would need real booking data
+            action: () => navigate('/services'),
+            buttonText: 'حجز موعد',
+            icon: '👨‍⚕️'
+        }
+    ], [assessments, latestOrder, navigate]);
+
+    const nextAction = useMemo(() => {
+        const hasProgress = !!localStorage.getItem('assessment_progress');
+
+        // Priority 8: All steps completed (Report Ready)
+        if (latestOrder?.operational_status === 'Report Ready') {
+            return {
+                title: 'حافظ وتعلم',
+                desc: 'استمر في ممارسات النوم الجيدة للحفاظ على صحتك وجودة حياتك.',
+                btn: 'عرض مرصد التعلم',
+                action: () => navigate('/education'),
+                secondary: 'حجز متابعة',
+                secondaryAction: () => navigate('/services')
+            };
+        }
+
+        // Priority 7: Upcoming consultation
+        if (profile?.upcoming_session) {
+            return {
+                title: 'جلستك قادمة',
+                desc: 'موعد جلستك الاستشارية يقترب، يرجى الاستعداد في الوقت المحدد.',
+                btn: 'انضم للجلسة',
+                action: () => window.open(profile.upcoming_session_link, '_blank'),
+                secondary: 'إعادة جدولة',
+                secondaryAction: () => navigate('/services')
+            };
+        }
+
+        // Priority 6: Home study ordered (awaiting results)
+        if (latestOrder && latestOrder.operational_status !== 'Report Ready') {
+            return {
+                title: 'تتبع دراسة نومك',
+                desc: 'تحقق من حالة طلبك أو ارفع بيانات جهاز التتبع المنزلي.',
+                btn: 'تتبع / رفع البيانات',
+                action: () => navigate('/services'),
+                secondary: 'تواصل مع الدعم',
+                secondaryAction: () => setIsSupportOpen(true)
+            };
+        }
+
+        // Priority 5: Home study eligible (Moderate risk + no orders)
+        if (latestAssessment && riskData?.color === "#fd8f52" && !latestOrder) {
+            return {
+                title: 'أكد عبر دراسة منزلية',
+                desc: 'نوصي بإجراء دراسة نوم منزلية لتشخيص حالتك بشكل أدق وموثق.',
+                btn: 'اطلب الدراسة',
+                action: () => navigate('/services'),
+                secondary: 'لماذا نوصي بها؟',
+                secondaryAction: () => navigate('/education')
+            };
+        }
+
+        // Priority 4: Quiz completed - Moderate risk (fallback if already ordered or handled)
+        if (latestAssessment && riskData?.color === "#fd8f52") {
+            return {
+                title: 'حسن خطة نومك',
+                desc: 'استكشف التوصيات المخصصة لك بناءً على نتائج تقييمك.',
+                btn: 'عرض التوصيات',
+                action: () => navigate('/services'),
+                secondary: 'حجز استشارة',
+                secondaryAction: () => navigate('/services')
+            };
+        }
+
+        // Priority 3: Quiz completed - High risk
+        if (latestAssessment && riskData?.color === "#fe676e") {
+            return {
+                title: 'احجز استشارة طبية',
+                desc: 'بناءً على نتائجك، نوصي بالتحدث مع طبيب متخصص في أسرع وقت.',
+                btn: 'احجز الآن',
+                action: () => navigate('/services'),
+                secondary: 'عرض نتيجة الاستبيان',
+                secondaryAction: () => navigate('/results', { state: { fromProfile: true } })
+            };
+        }
+
+        // Priority 2: Quiz in progress
+        if (hasProgress && assessments.length === 0) {
+            return {
+                title: 'أكمل من حيث توقفت',
+                desc: 'لديك استبيان لم يكتمل بعد. أكمله الآن للحصول على تحليلك الخاص.',
+                btn: 'أكمل الاستبيان',
+                action: () => navigate('/assessment'),
+                secondary: 'عرض الإجابات الجزئية',
+                secondaryAction: () => navigate('/assessment')
+            };
+        }
+
+        // Priority 1: Quiz not started (Default)
+        if (assessments.length === 0) {
+            return {
+                title: 'ابدأ تقييم نومك',
+                desc: 'اكتشف جودة نومك وأهم المخاطر الصحية في ٥ دقائق فقط.',
+                btn: 'ابدأ الاستبيان',
+                action: () => navigate('/assessment'),
+                secondary: 'تعرف على الاستبيان',
+                secondaryAction: () => navigate('/education')
+            };
+        }
+
+        // Fallback for cases with assessments but no specific risk logic matched
+        return {
+            title: 'حافظ وتعلم',
+            desc: 'استمر في ممارسات النوم الجيدة للحفاظ على صحتك وجودة حياتك.',
+            btn: 'عرض مرصد التعلم',
+            action: () => navigate('/education'),
+            secondary: 'تصفح المحتوى',
+            secondaryAction: () => navigate('/education')
+        };
+    }, [assessments, latestAssessment, latestOrder, riskData, profile, navigate]);
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setMessage({ type: '', text: '' });
-
         try {
-            const result = await ProfilesAPI.updateProfile(profile.id, formData);
+            const result = await ProfilesAPI.updateProfile(profile.id, { ...formData, role: 'RegisteredUser' });
             setProfile(result.data);
-            setIsEditing(false);
-            setMessage({ type: 'success', text: 'تم تحديث الملف الشخصي بنجاح' });
-            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+            setMessage({ text: 'تم تحديث البيانات بنجاح', type: 'success' });
+            setTimeout(() => { setIsEditing(false); setMessage({ text: '', type: '' }); }, 2000);
         } catch (err) {
-            setMessage({ type: 'error', text: err.message || 'حدث خطأ أثناء التحديث' });
-        } finally {
-            setLoading(false);
-        }
+            setMessage({ text: err.message || 'حدث خطأ', type: 'error' });
+        } finally { setLoading(false); }
     };
 
-    const formatDate = (dateString, alternativeField) => {
-        const dateVal = dateString || alternativeField;
-        if (!dateVal) return 'تاريخ غير متوفر';
-
-        const date = new Date(dateVal);
-        if (isNaN(date.getTime())) return 'تاريخ غير صالح';
-
-        return date.toLocaleDateString('ar-EG', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+    const formatDate = (dateVal) => {
+        if (!dateVal) return '---';
+        return new Date(dateVal).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
-    if (!user) {
-        return (
-            <div className="profile-page container">
-                <div className="glass-card login-prompt" style={{ textAlign: 'center', padding: '4rem' }}>
-                    <div className="prompt-icon"></div>
-                    <h2>يرجى تسجيل الدخول لعرض الملف الشخصي</h2>
-                    <p>انضم إلينا لمتابعة رحلة تحسين جودة حياتك ونومك.</p>
-                    <button className="btn-primary" onClick={() => navigate('/login')}>تسجيل الدخول</button>
-                </div>
+    if (!user) return (
+        <div className="profile-page container">
+            <div className="glass-card login-prompt" style={{ textAlign: 'center', padding: '4rem' }}>
+                <h2>يرجى تسجيل الدخول</h2>
+                <button className="btn-primary" onClick={() => navigate('/login')}>تسجيل الدخول</button>
             </div>
-        );
-    }
+        </div>
+    );
 
     return (
         <div className="profile-page container">
-            <motion.div
-                className="profile-header-section"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                <div className="profile-cover">
-                    <div className="cover-overlay"></div>
-                </div>
-                <div className="profile-header-content">
-                    <div className="profile-avatar-wrapper">
-                        <img
-                            src={profile?.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=86a3b0&color=fff&size=128`}
-                            alt={formData.name}
-                            className="profile-avatar"
-                        />
-                        <div className="avatar-badge"></div>
-                    </div>
-                    <div className="profile-basic-info">
-                        <h1>{formData.name || 'مستخدم سرمد'}</h1>
-                        <div className="profile-badges">
-                            {riskData && (
-                                <span className="profile-status-badge" style={{ backgroundColor: riskData.color }}>
-                                    {riskData.label}
-                                </span>
-                            )}
+            {/* 1. Identity Strip (Sketch Style) */}
+            <motion.div className="identity-strip" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="id-info-wrapper">
+                    <img src={profile?.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || 'مستخدم')}&background=86a3b0&color=fff`} className="id-avatar" alt="" />
+                    <div className="id-details">
+                        <div className="id-name-header">
+                            <h3>{profile?.name || 'مستخدم سرمد'}</h3>
+                            <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>تعديل الملف</button>
+                        </div>
+                        <span className="sarmad-id">SARMAD ID: #{profile?.id?.slice(0, 8).toUpperCase()}</span>
+                        <div className="id-stats-row">
+                            <span className="stat-item">مستوى الخطر: <strong style={{ color: riskData?.color || 'inherit' }}>{riskData?.label?.split(' ')[0] || '---'}</strong></span>
+                            <span className="stat-item">متوسط النوم: <strong>6.2 ساعة</strong></span>
+                            <span className="stat-item">آخر نشاط: <strong>{assessments.length > 0 ? 'منذ يومين' : '---'}</strong></span>
                         </div>
                     </div>
-                    <div className="profile-actions">
-                        <button className="btn-primary" onClick={() => setIsEditing(true)}>
-                            تعديل الملف الشخصي
-                        </button>
-                        <button className="btn-secondary" onClick={() => setIsLogoutOpen(true)}>
-                            تسجيل الخروج
-                        </button>
-                    </div>
                 </div>
-
             </motion.div>
 
-            {/* Sleep Quality Status Section */}
-            {riskData && latestAssessment && (
-                <motion.div
-                    className="glass-card sleep-status-card"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                    <div className="status-header">
-                        <h3>حالة جودة النوم</h3>
-                        <span className="status-date">آخر تقييم: {formatDate(latestAssessment.created_at)}</span>
-                    </div>
-                    <div className="status-content" style={{ background: riskData.background }}>
-                        <div className="status-score-section">
-                            <div className="status-score-circle" style={{ borderColor: riskData.color }}>
-                                <span className="status-score-value" style={{ color: riskData.color }}>
-                                    {Math.round(latestAssessment.score || 0)}%
-                                </span>
-                                <span className="status-score-label">النتيجة</span>
+            <div className="profile-main-grid special-layout">
+                {/* 1. Left Column (Fixed Width): Next Best Action */}
+                <div className="smart-panel-column left-side">
+                    <motion.div className="smart-panel-sketch full-height-panel" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                        <div className="next-step-header">
+                            <h3>خطوتك التالية</h3>
+                        </div>
+                        <div className="next-step-content">
+                            <div className="cta-logic-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', textAlign: 'right' }}>
+                                <p className="rec-action-label" style={{ marginBottom: '0.2rem' }}>الإجراء الموصى به:</p>
+                                <h4 className="cta-title-text" style={{ fontSize: '1.4rem', fontWeight: '800', lineHeight: '1.2' }}>{nextAction.title}</h4>
+                                <p className="cta-desc-text" style={{ fontSize: '0.95rem', opacity: 0.8, lineHeight: '1.5' }}>{nextAction.desc}</p>
+
+                                <div className="action-divider" style={{ margin: '1rem 0' }}></div>
+                                <p className="risk-statement" style={{ fontSize: '1rem', marginBottom: '1rem' }}>
+                                    حالة الخطر: <strong style={{ color: riskData?.color || 'var(--accent-color)', display: 'inline', fontSize: 'inherit' }}>{riskData?.label || 'مخاطر منخفضة'}</strong>
+                                </p>
+
+                                <div className="cta-actions-stack" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <button className="book-btn-sketch" onClick={nextAction.action}>
+                                        {nextAction.btn}
+                                    </button>
+
+                                    {nextAction.secondary && (
+                                        <button
+                                            className="view-all-btn-sketch"
+                                            onClick={nextAction.secondaryAction || nextAction.action}
+                                            style={{ margin: 0, background: 'var(--card-bg)', color: 'var(--accent-color)' }}
+                                        >
+                                            {nextAction.secondary}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                        <div className="status-info-section">
-                            <h4 className="status-level" style={{ color: riskData.color }}>
-                                {riskData.label}
-                            </h4>
-                            <p className="status-description">{riskData.status}</p>
-                            <button
-                                className="btn-view-details"
-                                onClick={() => navigate(`/results?id=${latestAssessment.id}`)}
-                                style={{ borderColor: riskData.color, color: riskData.color }}
-                            >
-                                عرض التفاصيل الكاملة
-                            </button>
+                    </motion.div>
+                </div>
+
+                {/* 2. Right Column (Flexible): Data & History */}
+                <div className="journey-column right-side">
+                    <div className="top-compact-row">
+                        {/* Your Sleep Journey */}
+                        <div className="glass-card section-card compact-card">
+                            <h3 className="card-title-sketch">رحلة نومك</h3>
+                            <div className="journey-list-sketch">
+                                <div className={`journey-line ${journeySteps[0].status}`}>
+                                    <span className="line-num">١. الاستبيان</span>
+                                    <span className="line-status">{journeySteps[0].status === 'completed' ? '✓' : '○'}</span>
+                                </div>
+                                <div className={`journey-line ${journeySteps[1].status}`}>
+                                    <span className="line-num">٢. دراسة النوم المنزلية</span>
+                                    <span className="line-status">{journeySteps[1].status === 'completed' ? '✓' : '○'}</span>
+                                </div>
+                                <div className={`journey-line ${journeySteps[2].status}`}>
+                                    <span className="line-num">٣. الاستشارة الطبية</span>
+                                    <span className="line-status">{journeySteps[2].status === 'completed' ? '✓' : '○'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sleep Snapshot */}
+                        <div className="glass-card section-card compact-card">
+                            <h3 className="card-title-sketch">لمحة النوم</h3>
+                            <ul className="snapshot-list mini-grid">
+                                <li><span>الجودة:</span> <strong>{latestAssessment ? Math.round(latestAssessment.score) : '---'}%</strong></li>
+                                <li><span>الخطر:</span> <strong style={{ color: riskData?.color }}>{riskData?.label?.split(' ')[0] || '---'}</strong></li>
+                                <li><span>الساعات:</span> <strong>6.2 س</strong></li>
+                                <li><span>النمط:</span> <strong>غير منتظم</strong></li>
+                            </ul>
                         </div>
                     </div>
-                </motion.div>
-            )}
 
-            <div className="profile-content-grid">
-                <motion.div
-                    className="glass-card activity-card full-width"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                    <div className="activity-tabs">
-                        <button
-                            className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('saved')}
-                        >
-                            المحتوى المحفوظ
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'assessments' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('assessments')}
-                        >
-                            تقييماتي
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
-                            onClick={() => {
-                                setActiveTab('orders');
-                                if (orders.length === 0) {
-                                    fetchOrders();
-                                }
-                            }}
-                        >
-                            طلباتي
-                        </button>
+                    {/* Recent Sessions */}
+                    <div className="glass-card section-card">
+                        <h3 className="card-title-sketch">الجلسات الأخيرة</h3>
+                        <div className="sessions-list-sketch">
+                            {assessments.slice(0, 3).map((item, idx) => (
+                                <div key={item.id} className="session-line">
+                                    <span>• {formatDate(item.created_at)} - {idx === 0 ? 'تقييم' : 'متابعة'}</span>
+                                    <span className="session-icon">{idx === 0 ? '✓' : '→'}</span>
+                                </div>
+                            ))}
+                            <button className="view-all-btn-sketch" onClick={() => setActiveTab('assessments')}>عرض جميع الجلسات</button>
+                        </div>
                     </div>
 
-                    <div className="tab-content">
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'saved' ? (
-                                <motion.div
-                                    key="saved"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="activity-list"
-                                >
-                                    {contentLoading ? (
-                                        <div className="loading-state">
-                                            <div className="spinner"></div>
-                                            <p>جاري تحميل محتواك المفضل...</p>
-                                        </div>
-                                    ) : savedContent.length > 0 ? (
-                                        savedContent.map(item => (
-                                            <div
-                                                key={item.id}
-                                                className="activity-item premium-item"
-                                                onClick={() => {
-                                                    const type = item.content?.type;
-                                                    const contentId = item.content_id || item.course_id;
-                                                    const path = type === 'video' ? 'video' : type === 'course' ? 'course' : 'article';
-                                                    navigate(`/education/${path}/${contentId}`);
-                                                }}
-                                            >
-                                                <div className="item-visual">
-                                                    {item.content?.thumbnail_image ? (
-                                                        <img src={item.content.thumbnail_image} alt="" className="item-thumb" />
-                                                    ) : (
-                                                        <div className="item-icon-placeholder">{item.content?.type === 'video' ? 'فيديو' : item.content?.type === 'course' ? 'دورة' : 'مقال'}</div>
-                                                    )}
-                                                    <div className="type-badge">{item.content?.type === 'video' ? 'فيديو' : item.content?.type === 'course' ? 'دورة' : 'مقال'}</div>
-                                                </div>
-                                                <div className="item-info">
-                                                    <h4>{item.content?.title || 'محتوى غير معروف'}</h4>
-                                                    <div className="item-meta">
-                                                        <span className="date">تم الحفظ في: {formatDate(item.saved_at, item.created_at)}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="item-action">
-                                                    <span className="arrow">←</span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="empty-activity">
-                                            <div className="icon"></div>
-                                            <p>لم تقم بحفظ أي محتوى بعد. ابدأ باستكشاف مركز المعرفة!</p>
-                                            <button className="btn-primary" onClick={() => navigate('/education')}>اكتشف المحتوى</button>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            ) : activeTab === 'assessments' ? (
-                                <motion.div
-                                    key="assessments"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="activity-list"
-                                >
-                                    {contentLoading ? (
-                                        <div className="loading-state">
-                                            <div className="spinner"></div>
-                                            <p>جاري جلب نتائج تقييماتك...</p>
-                                        </div>
-                                    ) : assessments.length > 0 ? (
-                                        assessments.map(item => (
-                                            <div
-                                                key={item.id}
-                                                className="activity-item premium-item"
-                                                onClick={() => navigate(`/results?id=${item.id}`)}
-                                            >
-                                                <div className="item-visual assessment-visual">
-                                                    <div className="score-ring">
-                                                        <span className="score-val">{Math.round(item.score || 0)}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="item-info">
-                                                    <h4>تقييم جودة النوم</h4>
-                                                    <div className="item-meta">
-                                                        <span className="date">بتاريخ: {formatDate(item.created_at)}</span>
-                                                        <span className="status-chip completed">مكتمل</span>
-                                                    </div>
-                                                </div>
-                                                <div className="item-action">
-                                                    <span className="arrow">←</span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="empty-activity">
-                                            <div className="icon"></div>
-                                            <p>لم تقم بإجراء أي تقييمات حتى الآن. ابدأ الآن واعرف مستوى جودة نومك!</p>
-                                            <button className="btn-primary" onClick={() => navigate('/assessment')}>ابدأ التقييم الأول</button>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            ) : activeTab === 'orders' ? (
-                                <motion.div
-                                    key="orders"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="activity-list"
-                                >
-                                    {contentLoading ? (
-                                        <div className="loading-state">
-                                            <div className="spinner"></div>
-                                            <p>جاري تحميل طلباتك...</p>
-                                        </div>
-                                    ) : orders.length > 0 ? (
-                                        orders.map(order => (
-                                            <div
-                                                key={order.id}
-                                                className="activity-item order-item"
-                                            >
-                                                <div className="order-visual">
-                                                    <div className="order-icon">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <path d="M20 7h-4m0 0V3m0 4v4m0-4h-4m8 6H4a1 1 0 00-1 1v10a1 1 0 001 1h16a1 1 0 001-1V14a1 1 0 00-1-1z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                <div className="item-info">
-                                                    <h4>طلب فحص النوم المنزلي</h4>
-                                                    <div className="item-meta">
-                                                        <span className="date">تاريخ الطلب: {formatDate(order.created_at)}</span>
-                                                        <span className={`status-chip order-status-${order.operational_status?.toLowerCase().replace(' ', '-')}`}>
-                                                            {order.operational_status || 'قيد المعالجة'}
-                                                        </span>
-                                                    </div>
-                                                    {order.tracking_ref && (
-                                                        <div className="order-tracking">
-                                                            <span>رقم التتبع: {order.tracking_ref}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="item-action">
-                                                    <span className="arrow">←</span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="empty-activity">
-                                            <div className="icon"></div>
-                                            <p>لم تقم بطلب أي خدمات بعد. اطلب فحص النوم المنزلي الآن!</p>
-                                            <button className="btn-primary" onClick={() => navigate('/services')}>استكشف الخدمات</button>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            ) : null}
-                        </AnimatePresence>
+                    {/* Documents */}
+                    <div className="glass-card section-card">
+                        <h3 className="card-title-sketch">الوثائق</h3>
+                        <div className="docs-list">
+                            <div className="doc-item">
+                                <div className="doc-info">
+                                    <span className="doc-icon">📄</span>
+                                    <div className="doc-meta">
+                                        <span className="doc-name">أحدث تقرير نوم.pdf</span>
+                                        <span className="doc-date">٢٠ فبراير ٢٠٢٦</span>
+                                    </div>
+                                </div>
+                                <button className="doc-btn download">تحميل</button>
+                            </div>
+                            <button className="upload-btn-sketch">رفع وثيقة</button>
+                        </div>
                     </div>
-                </motion.div>
+
+                    {/* Medical Info */}
+                    <div className="glass-card section-card medical-accordion">
+                        <details>
+                            <summary className="card-title-sketch">
+                                المعلومات الطبية (اختياري)
+                                <span className="accordion-arrow">▼</span>
+                            </summary>
+                            <div className="med-info-grid">
+                                <div className="med-fact">
+                                    <label>الحالات الطبية:</label>
+                                    <p>{profile?.conditions || 'لا يوجد'}</p>
+                                </div>
+                                <div className="med-fact">
+                                    <label>الحساسية:</label>
+                                    <p>{profile?.allergies || 'لا يوجد'}</p>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
             </div>
 
-            {/* Edit Profile Modal */}
+            {/* Modals - Simplified for cleaner code */}
             <AnimatePresence>
                 {isEditing && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsEditing(false)}
-                    >
-                        <motion.div
-                            className="modal-content"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
+                    <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsEditing(false)}>
+                        <motion.div className="modal-content profile-edit-modal" initial={{ y: 50 }} animate={{ y: 0 }} onClick={e => e.stopPropagation()}>
                             <div className="modal-header">
-                                <h2>تعديل المعلومات الشخصية</h2>
-                                <button className="modal-close" onClick={() => setIsEditing(false)}>×</button>
+                                <h2>تعديل البيانات</h2>
+                                <button onClick={() => setIsEditing(false)}>×</button>
                             </div>
-
-                            {message.text && (
-                                <div className={`status-message ${message.type}`}>
-                                    {message.text}
+                            <form className="profile-form" onSubmit={handleSubmit}>
+                                {message.text && (
+                                    <div className={`status-message ${message.type}`}>
+                                        {message.text}
+                                    </div>
+                                )}
+                                <div className="form-group">
+                                    <label>الاسم</label>
+                                    <input name="name" value={formData.name} onChange={handleChange} required />
                                 </div>
-                            )}
-
-                            <form onSubmit={handleSubmit} className="profile-form">
-                                <div className="form-grid">
-                                    <div className="form-group">
-                                        <label>الاسم بالكامل</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            required
-                                            placeholder="أدخل اسمك الكامل"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>البريد الإلكتروني</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            disabled
-                                            className="disabled-input"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>رقم الهاتف</label>
-                                        <input
-                                            type="tel"
-                                            name="mobile"
-                                            value={formData.mobile}
-                                            onChange={handleChange}
-                                            placeholder="01xxxxxxxxx"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>المدينة</label>
-                                        <input
-                                            type="text"
-                                            name="city"
-                                            value={formData.city}
-                                            onChange={handleChange}
-                                            placeholder="القاهرة، الرياض..."
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>الفئة العمرية</label>
-                                        <select name="age_range" value={formData.age_range} onChange={handleChange}>
-                                            <option value="">اختر الفئة</option>
-                                            <option value="18-24">18-24</option>
-                                            <option value="25-34">25-34</option>
-                                            <option value="35-44">35-44</option>
-                                            <option value="45-54">45-54</option>
-                                            <option value="55+">55+</option>
-                                        </select>
-                                    </div>
+                                <div className="form-row">
                                     <div className="form-group">
                                         <label>الجنس</label>
                                         <select name="gender" value={formData.gender} onChange={handleChange}>
-                                            <option value="">اختر الجنس</option>
                                             <option value="male">ذكر</option>
                                             <option value="female">أنثى</option>
                                         </select>
                                     </div>
-                                </div>
-                                <div className="form-actions">
-                                    <button type="submit" className="btn-primary" disabled={loading}>
-                                        {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                                    </button>
-                                    <button type="button" className="btn-primary-ghost" onClick={() => setIsEditing(false)}>
-                                        إلغاء
-                                    </button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Sticky Support Button */}
-            <button
-                className="sticky-support-btn"
-                onClick={() => setIsSupportOpen(true)}
-                title="تواصل مع الدعم"
-            >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-            </button>
-
-            {/* Support Modal */}
-            <AnimatePresence>
-                {isSupportOpen && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsSupportOpen(false)}
-                    >
-                        <motion.div
-                            className="modal-content support-modal"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <div className="header-title-wrapper">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="header-icon">
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                                    </svg>
-                                    <h2>تواصل مع الدعم</h2>
-                                </div>
-                                <button className="modal-close" onClick={() => setIsSupportOpen(false)}>×</button>
-                            </div>
-                            <form onSubmit={(e) => {
-                                e.preventDefault();
-                                if (!supportMessage.trim()) {
-                                    setMessage({ type: 'error', text: 'الرجاء كتابة رسالة' });
-                                    return;
-                                }
-
-                                setSendingMessage(true);
-                                setMessage({ type: '', text: '' });
-
-                                MessagesAPI.sendMessage({
-                                    text: supportMessage,
-                                    level: 'user_support'
-                                }, session.access_token)
-                                    .then(() => {
-                                        setMessage({ type: 'success', text: 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.' });
-                                        setSupportMessage('');
-                                        setTimeout(() => {
-                                            setIsSupportOpen(false);
-                                            setMessage({ type: '', text: '' });
-                                        }, 2000);
-                                    })
-                                    .catch((error) => {
-                                        setMessage({ type: 'error', text: 'فشل إرسال الرسالة. حاول مرة أخرى.' });
-                                    })
-                                    .finally(() => {
-                                        setSendingMessage(false);
-                                    });
-                            }}>
-                                <div className="modal-body">
-                                    {message.text && (
-                                        <div className={`message-banner ${message.type}`}>
-                                            {message.text}
-                                        </div>
-                                    )}
                                     <div className="form-group">
-                                        <label>رسالتك</label>
-                                        <textarea
-                                            value={supportMessage}
-                                            onChange={(e) => setSupportMessage(e.target.value)}
-                                            placeholder="اكتب رسالتك هنا..."
-                                            rows="6"
-                                            disabled={sendingMessage}
-                                            required
-                                        />
+                                        <label>العمر</label>
+                                        <input name="age_range" value={formData.age_range} onChange={handleChange} />
                                     </div>
                                 </div>
-                                <div className="modal-footer">
-                                    <button type="submit" className="btn-primary" disabled={sendingMessage}>
-                                        {sendingMessage ? 'جاري الإرسال...' : 'إرسال'}
-                                    </button>
-                                    <button type="button" className="btn-secondary" onClick={() => setIsSupportOpen(false)} disabled={sendingMessage}>
-                                        إلغاء
-                                    </button>
+                                <div className="form-group">
+                                    <label>المدينة</label>
+                                    <input name="city" value={formData.city} onChange={handleChange} />
+                                </div>
+                                <div className="form-actions">
+                                    <button type="submit" className="btn-primary" disabled={loading}>حفظ</button>
+                                    <button type="button" className="btn-secondary-minimal" onClick={() => setIsEditing(false)}>إلغاء</button>
                                 </div>
                             </form>
                         </motion.div>
                     </motion.div>
                 )}
-            </AnimatePresence>
 
-            {/* Logout Confirmation Modal */}
-            <AnimatePresence>
                 {isLogoutOpen && (
-                    <motion.div
-                        className="modal-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsLogoutOpen(false)}
-                    >
-                        <motion.div
-                            className="modal-content logout-modal"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="modal-header">
-                                <h2>تسجيل الخروج</h2>
-                                <button className="modal-close" onClick={() => setIsLogoutOpen(false)}>×</button>
-                            </div>
-                            <div className="modal-body" style={{ padding: '2rem', textAlign: 'center' }}>
-                                <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟</p>
-                            </div>
-                            <div className="modal-footer" style={{ padding: '1.5rem 2rem', borderTop: '2px solid #f7fafc', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                <button className="btn-primary" onClick={() => {
-                                    logout();
-                                    setIsLogoutOpen(false);
-                                    navigate('/');
-                                }} style={{ backgroundColor: '#e53e3e', borderColor: '#e53e3e', color: 'white' }}>
-                                    نعم، تسجيل الخروج
-                                </button>
-                                <button className="btn-secondary" onClick={() => setIsLogoutOpen(false)}>
-                                    إلغاء
-                                </button>
+                    <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsLogoutOpen(false)}>
+                        <motion.div className="modal-content logout-confirm" initial={{ scale: 0.9 }} onClick={e => e.stopPropagation()}>
+                            <h3>تسجيل الخروج</h3>
+                            <p>هل أنت متأكد من رغبتك في تسجيل الخروج؟</p>
+                            <div className="form-actions">
+                                <button className="btn-danger" onClick={() => { logout(); navigate('/'); }}>نعم، متأكد</button>
+                                <button className="btn-secondary-minimal" onClick={() => setIsLogoutOpen(false)}>إلغاء</button>
                             </div>
                         </motion.div>
                     </motion.div>

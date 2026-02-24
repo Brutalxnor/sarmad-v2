@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import ProfilesAPI from '../../Api/Profiles/profiles.api';
 import { useToast } from '../shared/Toast';
+import PoliciesModal from '../PoliciesModal';
 
 const Login = () => {
     const [mode, setMode] = useState('phone'); // 'phone' or 'email'
@@ -81,39 +82,29 @@ const Login = () => {
     const from = (location.state?.from?.pathname || '/') + (location.state?.from?.search || '');
     const fromState = location.state?.from?.state || {};
 
-    // Consent states
-    const [consents, setConsents] = useState({
-        privacy: false,
-        terms: false,
-        health: false,
+    // Policies modal state
+    const [showPoliciesModal, setShowPoliciesModal] = useState(false);
+    const [policiesAccepted, setPoliciesAccepted] = useState(false);
+    const [consentChecks, setConsentChecks] = useState({
+        A: true,
+        B: true,
+        C: false,
+        D: false,
+        E: false,
     });
 
-    const handleConsentChange = (e) => {
-        setConsents({
-            ...consents,
-            [e.target.name]: e.target.checked,
-        });
-    };
+    const mandatoryAccepted = consentChecks.A && consentChecks.B;
 
-    const areConsentsValid = () => {
-        return consents.privacy && consents.terms && consents.health;
-    };
-
-    const handleAgreeAll = (e) => {
-        const checked = e.target.checked;
-        setConsents({
-            privacy: checked,
-            terms: checked,
-            health: checked,
-        });
+    const handleConsentToggle = (key) => {
+        setConsentChecks(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
     const handleLoginRequest = async (e) => {
         e.preventDefault();
         setError('');
 
-        if (!areConsentsValid()) {
-            setError('يرجى الموافقة على جميع الشروط للمتابعة');
+        if (!mandatoryAccepted) {
+            setError('يرجى الموافقة على البنود الإلزامية للمتابعة');
             return;
         }
 
@@ -395,130 +386,80 @@ const Login = () => {
                             </div>
                         )}
 
-                        {/* Consents */}
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.6rem',
-                            marginTop: '1.5rem',
-                            padding: '1.25rem',
-                            background: 'var(--card-bg)',
-                            borderRadius: '12px',
-                            border: '1px solid var(--glass-border)'
-                        }}>
-                            <p style={{
-                                fontSize: '0.95rem',
-                                fontWeight: '600',
-                                marginBottom: '0.5rem',
-                                color: 'var(--text-primary)'
-                            }}>
-                                الموافقات المطلوبة
-                            </p>
+                        {/* Consents Section */}
+                        <div className="login-consents-section">
+                            <div className="login-consents-header">
+                                <span>الموافقات والشروط</span>
+                                <button
+                                    type="button"
+                                    className="read-full-policies-link"
+                                    onClick={() => setShowPoliciesModal(true)}
+                                >
+                                    قراءة السياسات كاملة
+                                </button>
+                            </div>
 
-                            {/* Terms */}
-                            <label style={{
-                                display: 'flex',
-                                gap: '0.75rem',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                                padding: '0.6rem 0.75rem',
-                                borderRadius: '8px',
-                                background: consents.terms ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
-                                border: consents.terms ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
-                                transition: 'all 0.2s ease'
-                            }}>
+                            {/* Mandatory */}
+                            <label className="login-consent-item mandatory">
                                 <input
                                     type="checkbox"
-                                    name="terms"
-                                    checked={consents.terms}
-                                    onChange={handleConsentChange}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        accentColor: '#10b981'
-                                    }}
+                                    checked={consentChecks.A}
+                                    onChange={() => handleConsentToggle('A')}
                                 />
-                                <span style={{ fontSize: '0.9rem' }}>📋 أوافق على الشروط والأحكام</span>
+                                <div className="login-consent-text">
+                                    <span className="login-consent-tag mandatory">إلزامي</span>
+                                    أوافق على الشروط والأحكام، وسياسة الخصوصية، وشروط خدمات الرعاية الصحية عن بُعد، وسياسة الشكاوى والاقتراحات، وحقوق المستفيد
+                                </div>
                             </label>
 
-                            {/* Privacy */}
-                            <label style={{
-                                display: 'flex',
-                                gap: '0.75rem',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                                padding: '0.6rem 0.75rem',
-                                borderRadius: '8px',
-                                background: consents.privacy ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
-                                border: consents.privacy ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
-                                transition: 'all 0.2s ease'
-                            }}>
+                            <label className="login-consent-item mandatory">
                                 <input
                                     type="checkbox"
-                                    name="privacy"
-                                    checked={consents.privacy}
-                                    onChange={handleConsentChange}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        accentColor: '#10b981'
-                                    }}
+                                    checked={consentChecks.B}
+                                    onChange={() => handleConsentToggle('B')}
                                 />
-                                <span style={{ fontSize: '0.9rem' }}>🔒 أوافق على سياسة الخصوصية</span>
+                                <div className="login-consent-text">
+                                    <span className="login-consent-tag mandatory">إلزامي</span>
+                                    أوافق على جمع ومعالجة بياناتي الصحية وبيانات النوم
+                                </div>
                             </label>
 
-                            {/* Health */}
-                            <label style={{
-                                display: 'flex',
-                                gap: '0.75rem',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                                padding: '0.6rem 0.75rem',
-                                borderRadius: '8px',
-                                background: consents.health ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
-                                border: consents.health ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
-                                transition: 'all 0.2s ease'
-                            }}>
+                            {/* Optional */}
+                            <label className="login-consent-item optional">
                                 <input
                                     type="checkbox"
-                                    name="health"
-                                    checked={consents.health}
-                                    onChange={handleConsentChange}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        accentColor: '#10b981'
-                                    }}
+                                    checked={consentChecks.C}
+                                    onChange={() => handleConsentToggle('C')}
                                 />
-                                <span style={{ fontSize: '0.9rem' }}>⚕️ أوافق على إخلاء المسؤولية الصحية</span>
+                                <div className="login-consent-text">
+                                    <span className="login-consent-tag optional">اختياري</span>
+                                    أوافق على تلقي تذكيرات المواعيد وإشعارات الخدمة
+                                </div>
                             </label>
 
-                            {/* Agree to All - Now at bottom */}
-                            <button
-                                type="button"
-                                onClick={() => handleAgreeAll({ target: { checked: !areConsentsValid() } })}
-                                style={{
-                                    display: 'flex',
-                                    gap: '0.5rem',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    padding: '0.75rem 1rem',
-                                    marginTop: '0.5rem',
-                                    background: areConsentsValid()
-                                        ? 'linear-gradient(135deg, #10b981, #059669)'
-                                        : 'var(--accent-color)',
-                                    borderRadius: '8px',
-                                    color: '#fff',
-                                    border: 'none',
-                                    fontSize: '0.95rem',
-                                    fontWeight: '600',
-                                    transition: 'all 0.2s ease',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                }}
-                            >
-                                {areConsentsValid() ? '✓ تم الموافقة على الجميع' : 'الموافقة على جميع الشروط'}
-                            </button>
+                            <label className="login-consent-item optional">
+                                <input
+                                    type="checkbox"
+                                    checked={consentChecks.D}
+                                    onChange={() => handleConsentToggle('D')}
+                                />
+                                <div className="login-consent-text">
+                                    <span className="login-consent-tag optional">اختياري</span>
+                                    أوافق على تسجيل الجلسة الصوتية/المرئية
+                                </div>
+                            </label>
+
+                            <label className="login-consent-item optional">
+                                <input
+                                    type="checkbox"
+                                    checked={consentChecks.E}
+                                    onChange={() => handleConsentToggle('E')}
+                                />
+                                <div className="login-consent-text">
+                                    <span className="login-consent-tag optional">اختياري</span>
+                                    أوافق على الرسائل التسويقية والكوكيز غير الضرورية
+                                </div>
+                            </label>
                         </div>
 
                         <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '1rem', justifyContent: 'center' }}>
@@ -592,6 +533,15 @@ const Login = () => {
                         </div>
                     </form>
                 )}
+                {/* Policies Modal */}
+                <PoliciesModal
+                    isOpen={showPoliciesModal}
+                    onClose={() => setShowPoliciesModal(false)}
+                    onAgreeAll={() => {
+                        setConsentChecks(prev => ({ ...prev, A: true, B: true }));
+                        setPoliciesAccepted(true);
+                    }}
+                />
             </div>
         </div>
     );
