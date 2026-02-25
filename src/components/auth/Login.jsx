@@ -533,16 +533,16 @@ const Login = () => {
                         </div>
                     </form>
                 )}
-                {/* Policies Modal */}
-                <PoliciesModal
-                    isOpen={showPoliciesModal}
-                    onClose={() => setShowPoliciesModal(false)}
-                    onAgreeAll={() => {
-                        setConsentChecks(prev => ({ ...prev, A: true, B: true }));
-                        setPoliciesAccepted(true);
-                    }}
-                />
             </div>
+            {/* Policies Modal - Moved outside glass-card to avoid stacking context issues */}
+            <PoliciesModal
+                isOpen={showPoliciesModal}
+                onClose={() => setShowPoliciesModal(false)}
+                onAgreeAll={() => {
+                    setConsentChecks(prev => ({ ...prev, A: true, B: true }));
+                    setPoliciesAccepted(true);
+                }}
+            />
         </div>
     );
 };

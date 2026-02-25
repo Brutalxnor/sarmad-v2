@@ -100,16 +100,6 @@ const PoliciesModal = ({ isOpen, onClose, onAgreeAll, initialTab = 0 }) => {
                     >
                         {POLICIES[activeTab].render(consentChecks, handleConsentChange)}
 
-                        {/* Next Tab Button - shown after reading current tab */}
-                        {scrolledToBottom[activeTab] && activeTab < POLICIES.length - 1 && (
-                            <button
-                                className="policies-next-btn"
-                                onClick={handleNextTab}
-                            >
-                                <span>التالي: {POLICIES[activeTab + 1].label}</span>
-                                <span className="next-arrow">←</span>
-                            </button>
-                        )}
 
                         {/* All done indicator on last tab */}
                         {scrolledToBottom[activeTab] && activeTab === POLICIES.length - 1 && (
@@ -143,14 +133,21 @@ const PoliciesModal = ({ isOpen, onClose, onAgreeAll, initialTab = 0 }) => {
                         </button>
                         <button
                             className="policies-agree-btn"
-                            disabled={!allRead || !mandatoryConsentsOk}
-                            onClick={handleAgree}
+                            disabled={!(scrolledToBottom[activeTab] || allRead)}
+                            onClick={activeTab < POLICIES.length - 1 ? handleNextTab : handleAgree}
+                            style={{
+                                background: (scrolledToBottom[activeTab] && activeTab < POLICIES.length - 1)
+                                    ? 'linear-gradient(135deg, var(--accent-color), var(--text-secondary))'
+                                    : ''
+                            }}
                         >
-                            {!allRead
-                                ? `يرجى قراءة جميع السياسات (${readCount}/${POLICIES.length})`
-                                : !mandatoryConsentsOk
-                                    ? 'يجب الموافقة على البنود الإلزامية'
-                                    : 'أوافق على جميع السياسات'
+                            {activeTab < POLICIES.length - 1
+                                ? scrolledToBottom[activeTab]
+                                    ? `التالي: ${POLICIES[activeTab + 1].label}`
+                                    : `يرجى القراءة للمتابعة (${readCount}/${POLICIES.length})`
+                                : allRead
+                                    ? 'أوافق على جميع السياسات'
+                                    : `يرجى إكمال القراءة (${readCount}/${POLICIES.length})`
                             }
                         </button>
                     </div>
