@@ -14,6 +14,7 @@ import LessonDetails from './components/LessonDetails';
 import Login from './components/auth/Login';
 import Profile from './components/Profile';
 import ProfileCompletion from './components/auth/ProfileCompletion';
+import Checkout from './components/Checkout';
 import Footer from './components/Footer';
 import ScrollToTop from './components/shared/ScrollToTop';
 import WebinarsPage from './components/Webinars/WebinarsPage';
@@ -56,6 +57,7 @@ function App() {
             <Route path="/assessment" element={<Assessment />} />
             <Route path="/results" element={<Results />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/checkout" element={<Checkout />} />
 
 
 

@@ -61,26 +61,43 @@ const LessonDetails = () => {
 
                     {/* Content Body */}
                     <div className="article-body">
-                        {lesson.content_type === 'video' ? (
-                            <div className="video-player-container" style={{ position: 'relative', paddingTop: '56.25%', background: '#000', marginBottom: '2rem', borderRadius: '12px', overflow: 'hidden' }}>
-                                {lesson.content_url && lesson.content_url.includes('youtube') ? (
-                                    <iframe
-                                        src={lesson.content_url.replace('watch?v=', 'embed/')}
-                                        title={lesson.title}
-                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
-                                        allowFullScreen
-                                    />
-                                ) : (
-                                    <video
-                                        controls
-                                        src={lesson.content_url}
-                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                                    >
-                                        متصفحك لا يدعم تشغيل الفيديو.
-                                    </video>
-                                )}
-                            </div>
-                        ) : null}
+                        {lesson.content_type === 'video' ? (() => {
+                            const getYouTubeEmbedUrl = (url) => {
+                                if (!url) return null;
+                                let videoId = '';
+                                if (url.includes('youtube.com/watch?v=')) {
+                                    videoId = url.split('v=')[1]?.split('&')[0];
+                                } else if (url.includes('youtu.be/')) {
+                                    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+                                } else if (url.includes('youtube.com/embed/')) {
+                                    videoId = url.split('embed/')[1]?.split('?')[0];
+                                }
+                                return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+                            };
+                            const embedUrl = getYouTubeEmbedUrl(lesson.content_url);
+
+                            return (
+                                <div className="video-player-container" style={{ position: 'relative', paddingTop: '56.25%', background: '#000', marginBottom: '2rem', borderRadius: '12px', overflow: 'hidden' }}>
+                                    {embedUrl ? (
+                                        <iframe
+                                            src={embedUrl}
+                                            title={lesson.title}
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    ) : (
+                                        <video
+                                            controls
+                                            src={lesson.content_url}
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                        >
+                                            متصفحك لا يدعم تشغيل الفيديو.
+                                        </video>
+                                    )}
+                                </div>
+                            );
+                        })() : null}
 
                         {/* Text Content */}
                         {lesson.body && (

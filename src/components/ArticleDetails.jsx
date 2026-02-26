@@ -153,7 +153,6 @@ const ArticleDetails = () => {
                     </div>
 
                     <div className="disclaimer">
-                        <span>ℹ️</span>
                         <p>إخلاء مسؤولية طبية: المعلومات الواردة في هذا المقال هي لأغراض تعليمية فقط ولا تغني عن الاستشارة الطبية المتخصصة.</p>
                     </div>
                 </article>
@@ -164,10 +163,10 @@ const ArticleDetails = () => {
                     <div className="sidebar-cta">
                         <h3 className="cta-title">اتخذ خطوة نحو نوم أفضل</h3>
                         <button className="cta-btn primary">
-                            <span>📅</span> احجز استشارة طبية
+                            احجز استشارة طبية
                         </button>
                         <button className="cta-btn secondary">
-                            <span>✓</span> انضم لبرنامج تحسين النوم
+                            انضم لبرنامج تحسين النوم
                         </button>
                     </div>
 

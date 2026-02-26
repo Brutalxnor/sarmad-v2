@@ -1,0 +1,210 @@
+.checkout-page {
+    min-height: 90vh;
+    padding: 140px 20px 80px;
+    background: radial-gradient(circle at top right, rgba(253, 143, 82, 0.05), transparent 400px),
+        radial-gradient(circle at bottom left, rgba(199, 56, 102, 0.05), transparent 400px);
+}
+
+.checkout-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.checkout-card {
+    padding: 3rem;
+    border-radius: 32px;
+}
+
+.checkout-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.checkout-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.checkout-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.order-summary {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2.5rem;
+}
+
+.summary-item.main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.service-info h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.service-info p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.service-price {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    white-space: nowrap;
+}
+
+.summary-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 2rem 0;
+}
+
+.user-info-preview h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+}
+
+.info-row span:first-child {
+    color: var(--text-secondary);
+}
+
+.info-row span:last-child {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.payment-notice {
+    display: flex;
+    gap: 12px;
+    background: rgba(253, 143, 82, 0.1);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-top: 2rem;
+    border: 1px solid rgba(253, 143, 82, 0.2);
+}
+
+.notice-icon {
+    font-size: 1.2rem;
+}
+
+.payment-notice p {
+    font-size: 0.9rem;
+    color: #fd8f52;
+    margin: 0;
+}
+
+.confirm-btn {
+    width: 100%;
+    margin-top: 2.5rem;
+    padding: 1.2rem;
+    font-size: 1.2rem;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+.shipping-address-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.address-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group.full {
+    grid-column: span 2;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-right: 0.2rem;
+}
+
+.input-group input,
+.input-group textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.input-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+@media (max-width: 600px) {
+    .address-form {
+        grid-template-columns: 1fr;
+    }
+
+    .input-group.full {
+        grid-column: span 1;
+    }
+}
+
+.cancel-btn {
+    width: 100%;
+    margin-top: 1rem;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .checkout-card {
+        padding: 1.5rem;
+    }
+
+    .order-summary {
+        padding: 1.5rem;
+    }
+
+    .summary-item.main {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .service-price {
+        font-size: 1.5rem;
+    }
+}

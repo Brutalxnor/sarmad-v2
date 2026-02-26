@@ -66,9 +66,9 @@ const ServicesHero = ({ activeService, setActiveService, comingSoonServices = ['
                         <motion.button
                             key={service.id}
                             className={`service-tab ${service.id === activeService ? 'active' : ''} ${service.comingSoon ? 'coming-soon' : ''}`}
-                            onClick={() => !service.comingSoon && setActiveService(service.id)}
+                            onClick={() => setActiveService(service.id)}
                             variants={fadeInUp}
-                            whileHover={{ scale: service.comingSoon || service.id === activeService ? 1 : 1.05 }}
+                            whileHover={{ scale: service.id === activeService ? 1 : 1.05 }}
                             transition={{ duration: 0.3 }}
                         >
                             {service.comingSoon && (
