@@ -13,6 +13,7 @@ import newsData from '../data/news.json';
 const EducationGrid = ({ activeCategory, activeSegment }) => {
     const [articles, setArticles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -35,7 +36,7 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
                         type: 'course'
                     }));
                 } else if (activeCategory === 'news') {
-                    data = newsData.map(item => ({ ...item, type: 'article' })); // Map as article for rendering
+                    data = newsData.map(item => ({ ...item, type: 'article' }));
                 } else if (activeCategory === 'all') {
                     const [articlesRes, videosRes, coursesRes] = await Promise.all([
                         ContentAPI.getArticles(),
@@ -43,16 +44,16 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
                         CourseAPI.getAllCourses()
                     ]);
 
-                    const articles = (articlesRes.data || []).map(item => ({ ...item, type: 'article' }));
-                    const videos = (videosRes.data || []).map(item => ({ ...item, type: 'video' }));
-                    const courses = (coursesRes.data || []).map(item => ({
+                    const articlesList = (articlesRes.data || []).map(item => ({ ...item, type: 'article' }));
+                    const videosList = (videosRes.data || []).map(item => ({ ...item, type: 'video' }));
+                    const coursesList = (coursesRes.data || []).map(item => ({
                         ...item,
                         thumbnail_image: item.thumbnail_url,
                         type: 'course'
                     }));
-                    const news = newsData.map(item => ({ ...item, type: 'article' }));
+                    const newsList = newsData.map(item => ({ ...item, type: 'article' }));
 
-                    data = [...articles, ...videos, ...courses, ...news].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    data = [...articlesList, ...videosList, ...coursesList, ...newsList];
                 } else {
                     const response = await ArticleAPI.GetAllArticles();
                     const allData = response.data || [];
@@ -63,9 +64,7 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
                 // 2. Filter by segment if one is selected
                 if (activeSegment && activeSegment !== 'all') {
                     data = data.filter(item => {
-                        // Handle segment as array (based on database structure)
                         const segments = Array.isArray(item.segment) ? item.segment : [];
-
                         return (
                             segments.includes(activeSegment) ||
                             segments.includes('all') ||
@@ -75,6 +74,14 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
                         );
                     });
                 }
+
+                // 3. GLOBAL SORT: Newest to Oldest
+                // We convert created_at to a Date object. If it doesn't exist, we default to 0 (epoch)
+                data.sort((a, b) => {
+                    const dateA = new Date(a.created_at || 0);
+                    const dateB = new Date(b.created_at || 0);
+                    return dateB - dateA;
+                });
 
                 setArticles(data);
             } catch (error) {
@@ -88,11 +95,8 @@ const EducationGrid = ({ activeCategory, activeSegment }) => {
         fetchContent();
     }, [activeCategory, activeSegment]);
 
-
-
+    // Limit to the first 5 items for the grid view
     const currentItems = articles.slice(0, 5);
-
-    const navigate = useNavigate();
 
     const SeeMoreCard = (
         <div
