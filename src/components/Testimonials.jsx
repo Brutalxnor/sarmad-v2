@@ -58,6 +58,20 @@ const Testimonials = () => {
     fetchTestimonials();
   }, []);
 
+  // Helper to get YouTube embed URL
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return null;
+    let videoId = '';
+    if (url.includes('youtube.com/watch?v=')) {
+      videoId = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('embed/')[1]?.split('?')[0];
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : null;
+  };
+
   if (isLoading) {
     return null;
   }
@@ -71,54 +85,69 @@ const Testimonials = () => {
         </div>
 
         <div className="testimonials-grid">
-          {testimonials.map((t) => (
-            <div className={`testimonial-card ${playingId === t.id ? 'is-playing' : ''}`} key={t.id}>
-              <div className="card-image-container">
-                {playingId === t.id && t.video ? (
-                  <div className="video-player-wrapper">
-                    <button
-                      className="inline-video-close"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPlayingId(null);
-                      }}
+          {testimonials.map((t) => {
+            const embedUrl = getYouTubeEmbedUrl(t.video);
+
+            return (
+              <div className={`testimonial-card ${playingId === t.id ? 'is-playing' : ''}`} key={t.id}>
+                <div className="card-image-container">
+                  {playingId === t.id && t.video ? (
+                    <div className="video-player-wrapper">
+                      <button
+                        className="inline-video-close"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlayingId(null);
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                          <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                      {embedUrl ? (
+                        <iframe
+                          src={embedUrl}
+                          className="testimonial-video-inline"
+                          style={{ width: '100%', height: '100%', border: 0 }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          src={t.video}
+                          className="testimonial-video-inline"
+                          autoPlay
+                          controls
+                          onEnded={() => setPlayingId(null)}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className={`card-image ${t.video ? 'has-video' : ''}`}
+                      onClick={() => t.video && setPlayingId(t.id)}
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                    <video
-                      src={t.video}
-                      className="testimonial-video-inline"
-                      autoPlay
-                      controls
-                      onEnded={() => setPlayingId(null)}
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className={`card-image ${t.video ? 'has-video' : ''}`}
-                    onClick={() => t.video && setPlayingId(t.id)}
-                  >
-                    <img src={t.image} alt={t.name} />
-                    {t.video && (
-                      <div className="play-overlay">
-                        <div className="play-btn-pulse">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
+                      <img src={t.image} alt={t.name} />
+                      {t.video && (
+                        <div className="play-overlay">
+                          <div className="play-btn-pulse">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="card-content">
+                  <h3>{t.name}</h3>
+                  <p>{t.text}</p>
+                </div>
               </div>
-              <div className="card-content">
-                <h3>{t.name}</h3>
-                <p>{t.text}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

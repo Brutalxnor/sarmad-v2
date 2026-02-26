@@ -42,6 +42,16 @@ function App() {
   };
 
   useEffect(() => {
+    // Clear assessment progress on mount
+    localStorage.removeItem('assessment_progress');
+
+    // Clear assessment progress on unmount
+    return () => {
+      localStorage.removeItem('assessment_progress');
+    };
+  }, []);
+
+  useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
