@@ -58,41 +58,86 @@ const CourseDetails = () => {
     if (!course) return <div className="no-results">لم يتم العثور على الدورة</div>;
 
 
+    // Helper for youtube embed
+    const getYouTubeEmbedUrl = (url) => {
+        if (!url) return null;
+        let videoId = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            videoId = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            videoId = url.split('embed/')[1]?.split('?')[0];
+        }
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    };
+
+    const isVideoPromo = course.promotional_video_url || (course.type === 'video' && course.media_url);
+    const promoVideoUrl = course.promotional_video_url || course.media_url;
+    const embedUrl = isVideoPromo ? getYouTubeEmbedUrl(promoVideoUrl) : null;
+
+
     return (
         <div className="course-details-page">
             {/* Hero Section */}
-            <div className="course-hero">
-                {course.thumbnail_url && (
-                    <img src={course.thumbnail_url} alt={course.title} className="course-hero-bg" />
+            <div className={`course-hero ${isVideoPromo ? 'has-video' : ''}`}>
+                {isVideoPromo ? (
+                    <div className="course-hero-video-container">
+                        {embedUrl ? (
+                            <iframe
+                                className="course-hero-bg-video"
+                                src={embedUrl}
+                                title={course.title}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        ) : (
+                            <video
+                                className="course-hero-bg-video"
+                                controls
+                                src={promoVideoUrl}
+                                poster={course.thumbnail_url || course.thumbnail_image}
+                            >
+                                متصفحك لا يدعم تشغيل الفيديو.
+                            </video>
+                        )}
+                    </div>
+                ) : (
+                    course.thumbnail_url && (
+                        <img src={course.thumbnail_url || course.thumbnail_image} alt={course.title} className="course-hero-bg" />
+                    )
                 )}
-                <div className="course-hero-overlay"></div>
-                <div className="course-hero-content">
-                    {course.category && (
-                        <div className="course-badge">{course.category}</div>
-                    )}
-                    <h1 className="course-title">{course.title}</h1>
-                    <p className="course-description-short">
-                        {course.description ?
-                            course.description
-                                .replace(/<[^>]*>?/gm, '')
-                                .replace(/&nbsp;/g, ' ')
-                                .replace(/&amp;/g, '&')
-                                .replace(/&lt;/g, '<')
-                                .replace(/&gt;/g, '>')
-                                .replace(/&quot;/g, '"')
-                                .substring(0, 150) + '...'
-                            : ''
-                        }
-                    </p>
+                {!isVideoPromo && <div className="course-hero-overlay"></div>}
 
-                    <button className="course-cta-btn">
-                        ابدأ التعلم الآن
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="19" y1="12" x2="5" y2="12"></line>
-                            <polyline points="12 19 5 12 12 5"></polyline>
-                        </svg>
-                    </button>
-                </div>
+                {!isVideoPromo && (
+                    <div className="course-hero-content">
+                        {course.category && (
+                            <div className="course-badge">{course.category}</div>
+                        )}
+                        <h1 className="course-title">{course.title}</h1>
+                        <p className="course-description-short">
+                            {course.description ?
+                                course.description
+                                    .replace(/<[^>]*>?/gm, '')
+                                    .replace(/&nbsp;/g, ' ')
+                                    .replace(/&amp;/g, '&')
+                                    .replace(/&lt;/g, '<')
+                                    .replace(/&gt;/g, '>')
+                                    .replace(/&quot;/g, '"')
+                                    .substring(0, 150) + '...'
+                                : ''
+                            }
+                        </p>
+
+                        <button className="course-cta-btn">
+                            ابدأ التعلم الآن
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Stats Bar */}

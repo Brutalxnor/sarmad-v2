@@ -369,7 +369,7 @@ const Profile = () => {
                         <div className="glass-card section-card compact-card">
                             <h3 className="card-title-sketch">لمحة النوم</h3>
                             <ul className="snapshot-list mini-grid">
-                                <li><span>الجودة:</span> <strong>{latestAssessment ? Math.round(latestAssessment.score) : '---'}%</strong></li>
+                                <li><span>الدرجة:</span> <strong>{latestAssessment ? Math.round(latestAssessment.score) : '---'}</strong></li>
                                 <li><span>الخطر:</span> <strong style={{ color: riskData?.color }}>{riskData?.label?.split(' ')[0] || '---'}</strong></li>
                                 <li><span>الساعات:</span> <strong>6.2 س</strong></li>
                                 <li><span>النمط:</span> <strong>غير منتظم</strong></li>
@@ -377,27 +377,62 @@ const Profile = () => {
                         </div>
                     </div>
 
+                    {/* Assessments History */}
+                    {assessments.length > 0 && (
+                        <div className="glass-card section-card">
+                            <h3 className="card-title-sketch">سجل التقييمات</h3>
+                            <div className="sessions-list-sketch">
+                                {assessments
+                                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                    .slice(0, 5)
+                                    .map((item) => {
+                                        const rData = getRiskData(item.score, item.symptoms);
+                                        return (
+                                            <div key={item.id} className="session-line" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold' }}>• تقييم مستويات النوم - {formatDate(item.created_at)}</div>
+                                                    <div style={{ color: rData.color, fontSize: '0.9rem', marginRight: '1rem', marginTop: '0.2rem' }}>
+                                                        مستوى الخطر: {rData.label} (الدرجة: {Math.round(item.score)})
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    className="btn-primary"
+                                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: 'transparent', color: 'var(--accent-color)', border: '1px solid var(--accent-color)', borderRadius: '4px' }}
+                                                    onClick={() => navigate('/results', { state: { fromProfile: true, assessmentData: item } })}
+                                                >
+                                                    عرض النتائج
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Recent Sessions */}
                     <div className="glass-card section-card">
                         <h3 className="card-title-sketch">الجلسات والاستشارات</h3>
                         <div className="sessions-list-sketch">
-                            {/* Mix of assessments and consultations */}
-                            {[...assessments, ...consultations]
-                                .sort((a, b) => new Date(b.created_at || b.scheduled_at).getTime() - new Date(a.created_at || a.scheduled_at).getTime())
-                                .slice(0, 5)
-                                .map((item) => (
-                                    <div key={item.id} className="session-line">
-                                        <span>
-                                            • {formatDate(item.created_at || item.scheduled_at)} - {item.type?.name || (item.score ? 'تقييم شامل' : 'استشارة')}
-                                        </span>
-                                        <span className="session-icon" style={{
-                                            color: item.status === 'confirmed' ? '#22C55E' : (item.status === 'pending' ? '#F59E0B' : 'inherit')
-                                        }}>
-                                            {item.status === 'confirmed' ? '✓' : (item.status === 'pending' ? '⌛' : '•')}
-                                        </span>
-                                    </div>
-                                ))}
-                            <button className="view-all-btn-sketch" onClick={() => setActiveTab('history')}>عرض سجل النشاط</button>
+                            {consultations.length > 0 ? (
+                                consultations
+                                    .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())
+                                    .slice(0, 5)
+                                    .map((item) => (
+                                        <div key={item.id} className="session-line">
+                                            <span>
+                                                • {formatDate(item.scheduled_at)} - {item.type?.name || 'استشارة'}
+                                            </span>
+                                            <span className="session-icon" style={{
+                                                color: item.status === 'confirmed' ? '#22C55E' : (item.status === 'pending' ? '#F59E0B' : 'inherit')
+                                            }}>
+                                                {item.status === 'confirmed' ? '✓' : (item.status === 'pending' ? '⌛' : '•')}
+                                            </span>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div style={{ color: '#666', fontSize: '0.9rem', margin: '0.5rem 0' }}>لا توجد جلسات مضافة بعد</div>
+                            )}
+                            <button className="view-all-btn-sketch" onClick={() => navigate('/services')}>حجز استشارة طبية</button>
                         </div>
                     </div>
 

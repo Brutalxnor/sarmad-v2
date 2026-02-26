@@ -47,7 +47,7 @@ const StickyServiceButton = ({ serviceType }) => {
         }
 
         if (serviceType === 'expert') {
-            navigate('/book-consultation');
+            // navigate('/book-consultation');
             return;
         }
 
