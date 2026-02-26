@@ -75,21 +75,6 @@
         "thumbnail_image": "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2012&auto=format&fit=crop"
     },
     {
-        "id": "news-6",
-        "title": "World Sleep Day",
-        "organizer": "World Sleep Society",
-        "summary": "أهم حملة عالمية سنوية لرفع الوعي بالنوم الصحي واضطراباته.",
-        "timing": "مارس سنوياً",
-        "link": "https://worldsleepday.org",
-        "type": "news",
-        "category": "global",
-        "segment": [
-            "all"
-        ],
-        "created_at": "2026-02-28T00:00:00Z",
-        "thumbnail_image": "https://images.unsplash.com/photo-1455640127042-74704b207908?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
         "id": "news-7",
         "title": "SLEEP Annual Meeting",
         "organizer": "American Academy of Sleep Medicine + Sleep Research Society",
