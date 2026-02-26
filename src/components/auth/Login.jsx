@@ -6,9 +6,13 @@ import { useToast } from '../shared/Toast';
 import PoliciesModal from '../PoliciesModal';
 
 const Login = () => {
-    const [mode, setMode] = useState('phone'); // 'phone' or 'email'
-    const [phone, setPhone] = useState('');
-    const [countryCode, setCountryCode] = useState('+966');
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { showToast } = useToast();
+
+    const [mode, setMode] = useState(location.state?.mode || 'phone'); // 'phone' or 'email'
+    const [phone, setPhone] = useState(location.state?.phone || '');
+    const [countryCode, setCountryCode] = useState(location.state?.countryCode || '+966');
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
 
     const countries = [
@@ -22,16 +26,15 @@ const Login = () => {
         { code: '+962', name: 'Jordan', flag: 'jo' },
     ];
 
-    const [email, setEmail] = useState('');
+    // Check if we should start in verify mode from another page (e.g. Checkout)
+    const [initialName, setInitialName] = useState(location.state?.name || '');
+    const [email, setEmail] = useState(location.state?.email || '');
     const [otp, setOtp] = useState('');
-    const [step, setStep] = useState('request'); // 'request' or 'verify'
+    const [step, setStep] = useState(location.state?.initialStep || 'request'); // 'request' or 'verify'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [timer, setTimer] = useState(0);
+    const [timer, setTimer] = useState(location.state?.initialStep === 'verify' ? 60 : 0);
     const { loginWithPhone, verifyPhoneOtp, loginWithEmail, verifyEmailOtp, setProfile } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { showToast } = useToast();
 
     // Timer logic for OTP resend and back button
     useEffect(() => {
@@ -48,6 +51,8 @@ const Login = () => {
 
     // Auto-detect country based on IP
     useEffect(() => {
+        if (location.state?.countryCode) return; // Don't auto-detect if we already have one from state
+
         const detectCountry = async () => {
             try {
                 const response = await fetch('https://ipapi.co/json/');
@@ -77,7 +82,7 @@ const Login = () => {
         };
 
         detectCountry();
-    }, []);
+    }, [location.state?.countryCode]);
 
     const from = (location.state?.from?.pathname || '/') + (location.state?.from?.search || '');
     const fromState = location.state?.from?.state || {};
@@ -165,22 +170,24 @@ const Login = () => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
         try {
-            let data, error;
             let contactValue = '';
+            let res;
 
             if (mode === 'phone') {
-                // Use the same format as login request
                 const cleanPhone = phone.replace(/^0+/, '');
                 const fullPhone = `${countryCode}${cleanPhone}`;
                 contactValue = fullPhone;
-                ({ data, error } = await verifyPhoneOtp(fullPhone, otp));
+                res = await verifyPhoneOtp(fullPhone, otp);
             } else {
                 contactValue = email;
-                ({ data, error } = await verifyEmailOtp(email, otp));
+                res = await verifyEmailOtp(email, otp);
             }
 
-            if (error) throw error;
+            const { data, error: verifyErr } = res;
+
+            if (verifyErr) throw verifyErr;
 
             if (data.session) {
                 const authUser = data.session.user;
@@ -211,7 +218,7 @@ const Login = () => {
                     isNewUser = true;
                     const newProfileData = {
                         id: authUser.id,
-                        name: authUser.user_metadata?.full_name || 'New User',
+                        name: initialName || authUser.user_metadata?.full_name || 'مستخدم جديد',
                         role: 'RegisteredUser',
                         ...(mode === 'phone' ? { mobile: contactValue } : { email: contactValue })
                     };
@@ -468,6 +475,11 @@ const Login = () => {
                     </form>
                 ) : (
                     <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                                تم إرسال الرمز إلى: {mode === 'phone' ? `${countryCode}${phone}` : email}
+                            </p>
+                        </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <label>رمز التحقق</label>
                             <input

@@ -398,10 +398,16 @@ const Results = () => {
                                 </div>
                                 <button
                                     className="btn-rec-primary"
-                                    onClick={() => requireAuth(() => {
-                                        const dest = (action.state?.activeService === 'expert' || action.state?.activeService === 'home-test') ? '/checkout' : (action.path || '/services');
-                                        navigate(dest, { state: action.state });
-                                    })}
+                                    onClick={() => {
+                                        const isHomeTest = action.state?.activeService === 'home-test';
+                                        const dest = isHomeTest ? '/checkout' : (action.state?.activeService === 'expert' ? '/book-consultation' : (action.path || '/services'));
+
+                                        if (isHomeTest) {
+                                            navigate(dest, { state: action.state });
+                                        } else {
+                                            requireAuth(() => navigate(dest, { state: action.state }));
+                                        }
+                                    }}
                                 >
                                     {action.btnText} <span>←</span>
                                 </button>
@@ -424,10 +430,16 @@ const Results = () => {
                                 </div>
                                 <button
                                     className="btn-rec-outline"
-                                    onClick={() => requireAuth(() => {
-                                        const dest = (action.state?.activeService === 'expert' || action.state?.activeService === 'home-test') ? '/checkout' : (action.path || '/services');
-                                        navigate(dest, { state: action.state });
-                                    })}
+                                    onClick={() => {
+                                        const isHomeTest = action.state?.activeService === 'home-test';
+                                        const dest = isHomeTest ? '/checkout' : (action.state?.activeService === 'expert' ? '/book-consultation' : (action.path || '/services'));
+
+                                        if (isHomeTest) {
+                                            navigate(dest, { state: action.state });
+                                        } else {
+                                            requireAuth(() => navigate(dest, { state: action.state }));
+                                        }
+                                    }}
                                 >
                                     {action.btnText}
                                 </button>
@@ -456,10 +468,16 @@ const Results = () => {
                                         </div>
                                         <button
                                             className="btn-rec-text"
-                                            onClick={() => requireAuth(() => {
-                                                const dest = (action.state?.activeService === 'expert' || action.state?.activeService === 'home-test') ? '/checkout' : (action.path || '/services');
-                                                navigate(dest, { state: action.state });
-                                            })}
+                                            onClick={() => {
+                                                const isHomeTest = action.state?.activeService === 'home-test';
+                                                const dest = isHomeTest ? '/checkout' : (action.state?.activeService === 'expert' ? '/book-consultation' : (action.path || '/services'));
+
+                                                if (isHomeTest) {
+                                                    navigate(dest, { state: action.state });
+                                                } else {
+                                                    requireAuth(() => navigate(dest, { state: action.state }));
+                                                }
+                                            }}
                                         >
                                             {action.btnText}
                                         </button>

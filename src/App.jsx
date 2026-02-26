@@ -15,6 +15,8 @@ import Login from './components/auth/Login';
 import Profile from './components/Profile';
 import ProfileCompletion from './components/auth/ProfileCompletion';
 import Checkout from './components/Checkout';
+import ConsultationBooking from './components/ConsultationBooking';
+import ShippingSetup from './components/ShippingSetup';
 import Footer from './components/Footer';
 import ScrollToTop from './components/shared/ScrollToTop';
 import WebinarsPage from './components/Webinars/WebinarsPage';
@@ -68,6 +70,8 @@ function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/services" element={<Services />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/book-consultation" element={<ConsultationBooking />} />
+            <Route path="/shipping-setup" element={<ShippingSetup />} />
 
 
 

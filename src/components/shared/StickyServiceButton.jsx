@@ -40,6 +40,17 @@ const StickyServiceButton = ({ serviceType }) => {
     const current = config[serviceType] || config['expert'];
 
     const handleAction = () => {
+        if (serviceType === 'home-test') {
+            // Pay first then login - skip requireAuth and go to checkout
+            navigate('/checkout', { state: { activeService: serviceType } });
+            return;
+        }
+
+        if (serviceType === 'expert') {
+            navigate('/book-consultation');
+            return;
+        }
+
         requireAuth(() => {
             navigate('/checkout', { state: { activeService: serviceType } });
         });

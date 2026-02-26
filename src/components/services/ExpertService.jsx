@@ -329,7 +329,7 @@ const ExpertService = () => {
 
                                 <button
                                     className="modern-cta-btn"
-                                    onClick={() => requireAuth(() => navigate('/checkout', { state: { activeService: 'expert' } }))}
+                                    onClick={() => navigate('/book-consultation')}
                                 >
                                     قم بحجز موعد
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
