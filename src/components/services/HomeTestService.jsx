@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { fadeInUp, staggerContainer, growUp, fadeInLeft, fadeInRight } from './animations';
 import homeSleepLifestyle from '../../assets/home_sleep_lifestyle.png';
 import homeTestBannerBg from '../../assets/home_test_banner_bg.png';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './timeline.css';
 import './lifestyle-sections.css';
 import './service-sections.css';
@@ -21,6 +23,8 @@ const fadeInRightStagger = {
 };
 
 const HomeTestService = () => {
+    const navigate = useNavigate();
+    const { requireAuth } = useAuth();
     // ... (rest of component)
 
 
@@ -331,7 +335,10 @@ const HomeTestService = () => {
                     >
                         <h2 className="banner-title">جاهز تفعّل طاقة النوم الحقيقية؟</h2>
                         <p className="banner-subtitle">ترى النوم ما هو بس "عدد ساعات"...النوم هو كيف تعيد شحنك من راسك لقلبك لجسمك ولروحك. ابدأ رحلتك اليوم.</p>
-                        <button className="banner-btn-premium">
+                        <button
+                            className="banner-btn-premium"
+                            onClick={() => requireAuth(() => navigate('/checkout', { state: { activeService: 'home-test' } }))}
+                        >
                             قم بحجز موعد
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ width: '24px', height: '24px' }}>
                                 <path d="M19 12H5M12 19l-7-7 7-7" />

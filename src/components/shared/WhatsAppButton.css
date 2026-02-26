@@ -55,8 +55,13 @@
 }
 
 .whatsapp-sticky-btn:hover .whatsapp-icon-wrapper {
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
-    background-color: #128C7E;
+    box-shadow: 0 6px 20px rgba(253, 143, 82, 0.4);
+    background-color: var(--tertiary-orange);
+}
+
+[data-theme='light'] .whatsapp-sticky-btn:hover .whatsapp-icon-wrapper {
+    box-shadow: 0 6px 20px rgba(199, 56, 102, 0.4);
+    background-color: var(--tertiary-magenta);
 }
 
 .whatsapp-sticky-btn:hover .whatsapp-tooltip {

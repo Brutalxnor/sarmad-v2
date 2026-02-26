@@ -396,7 +396,13 @@ const Results = () => {
                                     <p>{action.sub}</p>
                                     <small>{action.desc}</small>
                                 </div>
-                                <button className="btn-rec-primary" onClick={() => requireAuth(() => navigate(action.path || '/services', { state: action.state }))}>
+                                <button
+                                    className="btn-rec-primary"
+                                    onClick={() => requireAuth(() => {
+                                        const dest = (action.state?.activeService === 'expert' || action.state?.activeService === 'home-test') ? '/checkout' : (action.path || '/services');
+                                        navigate(dest, { state: action.state });
+                                    })}
+                                >
                                     {action.btnText} <span>←</span>
                                 </button>
                             </div>
@@ -416,7 +422,13 @@ const Results = () => {
                                     <p>{action.sub}</p>
                                     <small>{action.desc}</small>
                                 </div>
-                                <button className="btn-rec-outline" onClick={() => requireAuth(() => navigate(action.path || '/services', { state: action.state }))}>
+                                <button
+                                    className="btn-rec-outline"
+                                    onClick={() => requireAuth(() => {
+                                        const dest = (action.state?.activeService === 'expert' || action.state?.activeService === 'home-test') ? '/checkout' : (action.path || '/services');
+                                        navigate(dest, { state: action.state });
+                                    })}
+                                >
                                     {action.btnText}
                                 </button>
                             </div>
@@ -442,7 +454,13 @@ const Results = () => {
                                             <p>{action.sub}</p>
                                             <small>{action.desc}</small>
                                         </div>
-                                        <button className="btn-rec-text" onClick={() => requireAuth(() => navigate(action.path || '/services', { state: action.state }))}>
+                                        <button
+                                            className="btn-rec-text"
+                                            onClick={() => requireAuth(() => {
+                                                const dest = (action.state?.activeService === 'expert' || action.state?.activeService === 'home-test') ? '/checkout' : (action.path || '/services');
+                                                navigate(dest, { state: action.state });
+                                            })}
+                                        >
                                             {action.btnText}
                                         </button>
                                     </>

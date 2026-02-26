@@ -86,8 +86,8 @@ const Login = () => {
     const [showPoliciesModal, setShowPoliciesModal] = useState(false);
     const [policiesAccepted, setPoliciesAccepted] = useState(false);
     const [consentChecks, setConsentChecks] = useState({
-        A: true,
-        B: true,
+        A: false,
+        B: false,
         C: false,
         D: false,
         E: false,
@@ -237,7 +237,7 @@ const Login = () => {
     };
     return (
         <div className="container" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '120px 20px 60px' }}>
-            <div className="glass-card" style={{ maxWidth: '500px', width: '100%' }}>
+            <div className="glass-card no-hover" style={{ maxWidth: '500px', width: '100%', cursor: 'default' }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>تسجيل الدخول</h2>
 
                 {/* Mode Toggle */}

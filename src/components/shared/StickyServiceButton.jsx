@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './StickyServiceButton.css';
 
 const StickyServiceButton = ({ serviceType }) => {
+    const navigate = useNavigate();
+    const { requireAuth } = useAuth();
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -36,11 +40,9 @@ const StickyServiceButton = ({ serviceType }) => {
     const current = config[serviceType] || config['expert'];
 
     const handleAction = () => {
-        // Scroll to the actual pricing/booking section
-        const target = document.querySelector('.pricing-section, .hometest-banner-section-enhanced, .program-banner-section');
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
+        requireAuth(() => {
+            navigate('/checkout', { state: { activeService: serviceType } });
+        });
     };
 
     return (

@@ -45,13 +45,13 @@ const ServicesGrid = () => {
             <div className="card-text">
               <h3>دراسة وتحليل سلوك النوم في المنزل.</h3>
               <p>ابدأ من هنا لو تبغى تفهم جودة نومك أو تعاني من اضطرابات وتبغى تشخيص مبدئي.
-لا أسلاك. ولا غرف انتظار. فقط جهاز صغير يوصل لباب بيتك، تلبسه ليلة وحدة بدون تعب، ويسجّل بيانات نومك بكل سلاسة.</p>
+                لا أسلاك. ولا غرف انتظار. فقط جهاز صغير يوصل لباب بيتك، تلبسه ليلة وحدة بدون تعب، ويسجّل بيانات نومك بكل سلاسة.</p>
               <ul className="service-checklist">
                 <li><span className="check-mark">✓</span> جهاز مراقبة احترافي</li>
                 <li><span className="check-mark">✓</span> تحليل طبي شامل</li>
                 <li><span className="check-mark">✓</span> تقرير مفصل مع توصيات</li>
               </ul>
-              <button className="service-btn" onClick={() => navigate('/services')}>أطلب دراسة النوم المنزلية <span>←</span></button>
+              <button className="service-btn" onClick={() => navigate('/services', { state: { activeService: 'home-test' } })}>أطلب دراسة النوم المنزلية <span>←</span></button>
             </div>
           </motion.div>
 
@@ -67,17 +67,17 @@ const ServicesGrid = () => {
             </div>
             <div className="card-text">
               <h3> الاستشارات والتوجية الشخصي للنوم</h3>
-<p>خدمة مصممة لك إذا عندك نتائج أو تحديات وتحتاج توجيه مباشر. 
+              <p>خدمة مصممة لك إذا عندك نتائج أو تحديات وتحتاج توجيه مباشر.
 
-تعاني من صعوبة بالنوم؟
+                تعاني من صعوبة بالنوم؟
 
-جلسة عن بُعد مع خبير يساعدك تفهم مشكلتك، ويقترح خطوات علمية مخصصة. وتفهم نتائجك بشكل واضح.</p>
+                جلسة عن بُعد مع خبير يساعدك تفهم مشكلتك، ويقترح خطوات علمية مخصصة. وتفهم نتائجك بشكل واضح.</p>
               <ul className="service-checklist">
                 <li><span className="check-mark">✓</span> تقييم شامل لأنماط النوم</li>
                 <li><span className="check-mark">✓</span> خطة علاجية مخصصة</li>
                 <li><span className="check-mark">✓</span> متابعة لمدة شهر</li>
               </ul>
-              <button className="service-btn" onClick={() => navigate('/services')}>احجز استشارتك <span>←</span></button>
+              <button className="service-btn" onClick={() => navigate('/services', { state: { activeService: 'expert' } })}>احجز استشارتك <span>←</span></button>
             </div>
           </motion.div>
 
@@ -96,18 +96,18 @@ const ServicesGrid = () => {
             </div>
             <div className="card-text">
               <h3>التدريب والسلوكيات العلاجية </h3>
-<p>
-علاج النوم السلوكي المعرفي (CBT-I)
-العلاج الأهم عالمياً للأرق المزمن، معتمد على جلسات منظمة وسلوكيات مثبتة علمياً.
-برامج لفئات محددة
-مثل الحوامل، كبار السن، الرياضيين، رواد الأعمال، وغيرهم.
-</p>
+              <p>
+                علاج النوم السلوكي المعرفي (CBT-I)
+                العلاج الأهم عالمياً للأرق المزمن، معتمد على جلسات منظمة وسلوكيات مثبتة علمياً.
+                برامج لفئات محددة
+                مثل الحوامل، كبار السن، الرياضيين، رواد الأعمال، وغيرهم.
+              </p>
               <ul className="service-checklist">
                 <li><span className="check-mark">✓</span> 8 جلسات علاجية</li>
                 <li><span className="check-mark">✓</span> تمارين وواجبات منزلية</li>
                 <li><span className="check-mark">✓</span> تطبيق متابعة يومي</li>
               </ul>
-              <button className="service-btn" onClick={() => navigate('/services')}>أبدأ بالبرنامج <span>←</span></button>
+              <button className="service-btn" onClick={() => navigate('/services', { state: { activeService: 'program' } })}>أبدأ بالبرنامج <span>←</span></button>
             </div>
           </motion.div>
         </motion.div>

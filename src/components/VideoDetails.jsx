@@ -82,6 +82,24 @@ const VideoDetails = () => {
         }
     }
 
+    // Helper to get YouTube embed URL
+    const getYouTubeEmbedUrl = (url) => {
+        if (!url) return null;
+
+        let videoId = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            videoId = url.split('v=')[1]?.split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1]?.split('?')[0];
+        } else if (url.includes('youtube.com/embed/')) {
+            videoId = url.split('embed/')[1]?.split('?')[0];
+        }
+
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    };
+
+    const embedUrl = getYouTubeEmbedUrl(video.media_url);
+
     return (
         <div className="article-details-page" data-segment={dataSegment}>
             <div className="article-container">
@@ -89,20 +107,15 @@ const VideoDetails = () => {
                 {/* Main Content */}
                 <article className="article-content">
                     <div className="video-player-container" style={{ position: 'relative', paddingTop: '56.25%', background: '#000', borderRadius: '16px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-                        {/* 
-                            Assuming media_url can be a direct file or an embed. 
-                            For now, using a generic video tag for files. 
-                            If it's a YouTube link, we'd need an embed logic or a library.
-                            For MVP/Demo, simple video tag or iframe wrapper is standard.
-                        */}
-                        {video.media_url && video.media_url.includes('youtube') ? (
+                        {embedUrl ? (
                             <iframe
-                                src={video.media_url.replace('watch?v=', 'embed/')}
+                                src={embedUrl}
                                 title={video.title}
                                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                             />
-                        ) : (
+                        ) : video.media_url ? (
                             <video
                                 controls
                                 src={video.media_url}
@@ -111,6 +124,10 @@ const VideoDetails = () => {
                             >
                                 متصفحك لا يدعم تشغيل الفيديو.
                             </video>
+                        ) : (
+                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                لا يوجد رابط للفيديو
+                            </div>
                         )}
                     </div>
 
@@ -156,7 +173,6 @@ const VideoDetails = () => {
                     </div>
 
                     <div className="disclaimer">
-                        <span>ℹ️</span>
                         <p>إخلاء مسؤولية طبية: المعلومات الواردة في هذا الفيديو هي لأغراض تعليمية فقط ولا تغني عن الاستشارة الطبية المتخصصة.</p>
                     </div>
                 </article>
@@ -167,10 +183,10 @@ const VideoDetails = () => {
                     <div className="sidebar-cta">
                         <h3 className="cta-title">اتخذ خطوة نحو نوم أفضل</h3>
                         <button className="cta-btn primary">
-                            <span>📅</span> احجز استشارة طبية
+                            احجز استشارة طبية
                         </button>
                         <button className="cta-btn secondary">
-                            <span>✓</span> انضم لبرنامج تحسين النوم
+                            انضم لبرنامج تحسين النوم
                         </button>
                     </div>
 

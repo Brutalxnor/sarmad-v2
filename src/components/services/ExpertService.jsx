@@ -2,10 +2,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { fadeInUp, staggerContainer, smoothTextReveal, fadeInLeft, fadeInRight } from './animations';
 import expertConsultationImg from '../../assets/expert_consultation.png';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './lifestyle-sections.css';
 import './service-sections.css';
 
 const ExpertService = () => {
+    const navigate = useNavigate();
+    const { requireAuth } = useAuth();
+
     return (
         <>
             {/* Who Needs This Service Section */}
@@ -322,7 +327,10 @@ const ExpertService = () => {
                                     </li>
                                 </ul>
 
-                                <button className="modern-cta-btn">
+                                <button
+                                    className="modern-cta-btn"
+                                    onClick={() => requireAuth(() => navigate('/checkout', { state: { activeService: 'expert' } }))}
+                                >
                                     قم بحجز موعد
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                         <path d="M19 12H5M12 19l-7-7 7-7" />

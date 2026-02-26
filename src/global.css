@@ -275,6 +275,12 @@ button {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
+.glass-card.no-hover:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--card-border);
+}
+
 @media (max-width: 768px) {
   .glass-card {
     padding: 1.5rem;
