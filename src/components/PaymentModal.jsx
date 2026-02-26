@@ -67,25 +67,8 @@ const PaymentModal = ({ isOpen, onClose, onComplete, amount }) => {
                             <p>المبلغ المطلوب: {amount} ر.س</p>
                         </div>
 
-                        <div className={`card-preview ${cardType}`}>
-                            <div className="card-chip"></div>
-                            <div className="card-number-preview">
-                                {cardData.number || '•••• •••• •••• ••••'}
-                            </div>
-                            <div className="card-details-preview">
-                                <div className="card-holder">
-                                    <label>Card Holder</label>
-                                    <div>{cardData.name || 'FULL NAME'}</div>
-                                </div>
-                                <div className="card-exp">
-                                    <label>Expires</label>
-                                    <div>{cardData.expiry || 'MM/YY'}</div>
-                                </div>
-                            </div>
-                        </div>
-
                         <form className="payment-form" onSubmit={handleSubmit}>
-                            <div className="input-group full">
+                            <div className="input-group">
                                 <label>رقم البطاقة</label>
                                 <input
                                     type="text"
@@ -95,13 +78,13 @@ const PaymentModal = ({ isOpen, onClose, onComplete, amount }) => {
                                     required
                                 />
                             </div>
-                            <div className="input-group full">
+                            <div className="input-group">
                                 <label>الاسم على البطاقة</label>
                                 <input
                                     type="text"
-                                    placeholder="الاسم كما هو مكتوب"
+                                    placeholder="الاسم بالكامل"
                                     value={cardData.name}
-                                    onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
+                                    onChange={(e) => setCardData({ ...cardData, name: e.target.value.toUpperCase() })}
                                     required
                                 />
                             </div>
@@ -131,7 +114,7 @@ const PaymentModal = ({ isOpen, onClose, onComplete, amount }) => {
                             <button type="submit" className="btn-primary confirm-btn">
                                 دفع {amount} ر.س الآن
                             </button>
-                            <button type="button" className="btn-text cancel-btn" onClick={onClose}>
+                            <button type="button" className="btn-text cancel-btn" onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
                                 إلغاء
                             </button>
                         </form>

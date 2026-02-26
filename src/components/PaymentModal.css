@@ -5,34 +5,49 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
+    padding: 20px;
 }
 
 .payment-modal {
-    width: 95%;
-    max-width: 600px;
-    padding: 3rem;
+    width: 100%;
+    max-width: 500px;
+    max-height: calc(100vh - 40px);
+    background: var(--card-bg);
+    border-radius: 28px;
+    border: 1px solid var(--glass-border);
+    padding: 2.5rem;
     position: relative;
-    overflow: hidden;
-    margin: 20px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) transparent;
+    direction: rtl;
+    /* Ensure RTL for Arabic */
+}
+
+.payment-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.payment-modal::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 10px;
 }
 
 .payment-modal-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .payment-modal-header h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     margin-bottom: 0.5rem;
-    background: var(--accent-gradient);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
+    font-weight: 700;
 }
 
 .payment-modal-header p {
@@ -41,113 +56,48 @@
     opacity: 0.8;
 }
 
-.card-preview {
-    width: 100%;
-    height: 240px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-    border-radius: 24px;
-    padding: 2rem;
-    margin-bottom: 2.5rem;
-    position: relative;
-    color: white;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.card-preview.visa {
-    background: linear-gradient(135deg, #1a1f71 0%, #005fb8 100%);
-}
-
-.card-preview.mastercard {
-    background: linear-gradient(135deg, #eb001b 0%, #ff5f00 100%);
-}
-
-.card-preview.mada {
-    background: linear-gradient(135deg, #007a33 0%, #00a94f 100%);
-}
-
-.card-chip {
-    width: 45px;
-    height: 35px;
-    background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
-    border-radius: 6px;
-}
-
-.card-number-preview {
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-    font-family: 'Courier New', Courier, monospace;
-    margin: 1.5rem 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.card-details-preview {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-}
-
-.card-details-preview label {
-    font-size: 0.65rem;
-    letter-spacing: 1px;
-    opacity: 0.7;
-    margin-bottom: 4px;
-    display: block;
-}
-
-.payment-form .input-group input {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid var(--glass-border);
-    padding: 1rem 1.2rem;
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-size: 1.1rem;
-    width: 100%;
-    transition: all 0.3s ease;
-}
-
-.payment-form .input-group input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 4px rgba(134, 163, 176, 0.1);
-}
-
-.payment-form .input-group label {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    margin-right: 0.2rem;
-}
-
-.payment-methods {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    justify-content: center;
-}
-
-.method-icon {
-    width: 50px;
-    height: 32px;
-    object-fit: contain;
-    opacity: 0.5;
-    transition: all 0.3s ease;
-}
-
-.method-icon.active {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
+/* Form Styling */
 .payment-form {
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
+    direction: rtl;
+}
+
+.payment-form .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.payment-form .input-group label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-right: 4px;
+    text-align: right;
+}
+
+.payment-form .input-group input {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--glass-border) !important;
+    padding: 12px 16px !important;
+    border-radius: 12px !important;
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+    width: 100% !important;
+    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+}
+
+.payment-form .input-group input:focus {
+    outline: none !important;
+    border-color: var(--accent-color) !important;
+    background: var(--card-bg) !important;
+}
+
+.payment-form .input-group input::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.6 !important;
 }
 
 .exp-cvv {
@@ -156,15 +106,52 @@
     gap: 1rem;
 }
 
+.confirm-btn {
+    margin-top: 1rem;
+    padding: 15px !important;
+    font-size: 1.1rem !important;
+    border-radius: 14px !important;
+    background: var(--accent-gradient) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    text-align: center;
+    color: var(--text-secondary) !important;
+    font-size: 0.95rem !important;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+}
+
+.cancel-btn:hover {
+    opacity: 1;
+    color: var(--text-primary) !important;
+}
+
+.processing-view h3 {
+    color: var(--text-primary);
+}
+
+.processing-view p {
+    color: var(--text-secondary);
+}
+
+/* Animations */
 .processing-view {
     text-align: center;
-    padding: 2rem 0;
+    padding: 3rem 0;
 }
 
 .spinner {
     width: 50px;
     height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
+    border: 3px solid var(--glass-border);
     border-top-color: var(--accent-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;

@@ -7,6 +7,7 @@ import SavedCoursesAPI from '../Api/Courses/savedCourses.api';
 import AssessmentAPI from '../Api/Assessment/Assessment.api';
 import OrdersAPI from '../Api/Orders/orders.api';
 import MessagesAPI from '../Api/Messages/messages.api';
+import ConsultationsAPI from '../Api/Consultations/consultations.api';
 import './Profile.css';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,6 +49,7 @@ const Profile = () => {
     const [savedContent, setSavedContent] = useState([]);
     const [assessments, setAssessments] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [consultations, setConsultations] = useState([]);
     const [contentLoading, setContentLoading] = useState(true);
 
     useEffect(() => {
@@ -59,11 +61,12 @@ const Profile = () => {
     const fetchUserData = async () => {
         setContentLoading(true);
         try {
-            const [savedRes, savedCoursesRes, assessmentRes, ordersRes] = await Promise.all([
+            const [savedRes, savedCoursesRes, assessmentRes, ordersRes, consultationsRes] = await Promise.all([
                 ArticleAPI.GetSavedContent(session.access_token),
                 SavedCoursesAPI.getUserSavedCourses(session.access_token),
                 AssessmentAPI.GetUserAssessments(profile.id),
-                OrdersAPI.getUserOrders(session.access_token)
+                OrdersAPI.getUserOrders(session.access_token),
+                ConsultationsAPI.getMyBookings(profile.id, session.access_token)
             ]);
 
             const normalizedCourses = (savedCoursesRes.data || []).map(item => ({
@@ -84,6 +87,7 @@ const Profile = () => {
             setSavedContent(combinedContent);
             setAssessments(assessmentRes.data || []);
             setOrders(ordersRes.data || []);
+            setConsultations(consultationsRes.data || []);
         } catch (err) {
             console.error("Failed to fetch user data:", err);
         } finally {
@@ -132,12 +136,12 @@ const Profile = () => {
         {
             id: 'consultation',
             title: 'استشارة طبية متخصصة',
-            status: 'pending', // Would need real booking data
-            action: () => navigate('/services'),
-            buttonText: 'حجز موعد',
+            status: consultations.length > 0 ? 'completed' : 'pending',
+            action: () => navigate('/services', { state: { activeService: 'expert' } }),
+            buttonText: consultations.length > 0 ? 'حجز موعد جديد' : 'حجز موعد',
             icon: '👨‍⚕️'
         }
-    ], [assessments, latestOrder, navigate]);
+    ], [assessments, latestOrder, consultations, navigate]);
 
     const nextAction = useMemo(() => {
         const hasProgress = !!localStorage.getItem('assessment_progress');
@@ -375,15 +379,25 @@ const Profile = () => {
 
                     {/* Recent Sessions */}
                     <div className="glass-card section-card">
-                        <h3 className="card-title-sketch">الجلسات الأخيرة</h3>
+                        <h3 className="card-title-sketch">الجلسات والاستشارات</h3>
                         <div className="sessions-list-sketch">
-                            {assessments.slice(0, 3).map((item, idx) => (
-                                <div key={item.id} className="session-line">
-                                    <span>• {formatDate(item.created_at)} - {idx === 0 ? 'تقييم' : 'متابعة'}</span>
-                                    <span className="session-icon">{idx === 0 ? '✓' : '→'}</span>
-                                </div>
-                            ))}
-                            <button className="view-all-btn-sketch" onClick={() => setActiveTab('assessments')}>عرض جميع الجلسات</button>
+                            {/* Mix of assessments and consultations */}
+                            {[...assessments, ...consultations]
+                                .sort((a, b) => new Date(b.created_at || b.scheduled_at).getTime() - new Date(a.created_at || a.scheduled_at).getTime())
+                                .slice(0, 5)
+                                .map((item) => (
+                                    <div key={item.id} className="session-line">
+                                        <span>
+                                            • {formatDate(item.created_at || item.scheduled_at)} - {item.type?.name || (item.score ? 'تقييم شامل' : 'استشارة')}
+                                        </span>
+                                        <span className="session-icon" style={{
+                                            color: item.status === 'confirmed' ? '#22C55E' : (item.status === 'pending' ? '#F59E0B' : 'inherit')
+                                        }}>
+                                            {item.status === 'confirmed' ? '✓' : (item.status === 'pending' ? '⌛' : '•')}
+                                        </span>
+                                    </div>
+                                ))}
+                            <button className="view-all-btn-sketch" onClick={() => setActiveTab('history')}>عرض سجل النشاط</button>
                         </div>
                     </div>
 

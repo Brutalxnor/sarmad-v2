@@ -74,6 +74,29 @@ class OrdersAPI {
             throw error;
         }
     }
+
+    /**
+     * Create a new order by phone (for guest users)
+     * @param {Object} orderData - Order data including phone, name, address, etc.
+     * @returns {Promise} - Promise with created order
+     */
+    static async createOrderByPhone(orderData) {
+        try {
+            const response = await fetch(`${BASE_URL}/by-phone`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to create order by phone');
+            return data;
+        } catch (error) {
+            console.error('Error creating order by phone:', error);
+            throw error;
+        }
+    }
 }
 
 export default OrdersAPI;
